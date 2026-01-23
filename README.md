@@ -1,4 +1,4 @@
-# ARCAuthentication
+# 🧑‍🧒 ARCAuthentication
 
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg)
 ![Platforms](https://img.shields.io/badge/Platforms-iOS%2017%20%7C%20macOS%2014%20%7C%20watchOS%2010%20%7C%20tvOS%2017%20%7C%20visionOS%201-blue.svg)

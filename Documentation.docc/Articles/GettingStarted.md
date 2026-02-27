@@ -1,108 +1,106 @@
 # Getting Started
 
-Aprende a integrar ARCAuthentication en tu app.
+Integrate ARCAuthentication into your app to obtain authentication credentials.
 
 ## Overview
 
-Esta guía te muestra cómo configurar Sign in with Apple en tu aplicación iOS usando ARCAuthentication.
+This guide shows how to use Sign in with Apple in your iOS app using ARCAuthentication.
 
-## Requisitos Previos
+## Prerequisites
 
-1. Una cuenta de desarrollador de Apple
-2. Sign in with Apple habilitado en tu App ID
-3. El capability "Sign in with Apple" añadido a tu target en Xcode
+1. An Apple Developer account
+2. Sign in with Apple enabled on your App ID
+3. The "Sign in with Apple" capability added to your target in Xcode
 
-## Instalación
+## Installation
 
-Añade ARCAuthentication a tu `Package.swift`:
+Add ARCAuthentication to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/arclabs-studio/ARCAuthentication.git", from: "1.0.0")
+    .package(url: "https://github.com/arclabs-studio/ARCAuthentication.git", from: "2.0.0")
 ]
 ```
 
-## Configuración
+## Sign in with Apple
 
-### Paso 1: Crear el AuthenticationManager
-
-En tu `App.swift`, crea y configura el `AuthenticationManager`:
+### Step 1: Create the Provider
 
 ```swift
 import ARCAuthentication
-import SwiftUI
 
-@main
-struct MyApp: App {
-    @StateObject private var authManager: AuthenticationManager = {
-        let manager = AuthenticationManager()
-        manager.register(provider: AppleAuthProvider())
-        return manager
-    }()
+let appleProvider = AppleCredentialProvider()
+```
 
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environmentObject(authManager)
-        }
+### Step 2: Request a Credential
+
+```swift
+do {
+    let credential = try await appleProvider.requestCredential()
+
+    switch credential {
+    case .apple(let apple):
+        // Send apple.identityToken and apple.authorizationCode to your backend
+        print("User: \(apple.userIdentifier)")
+    case .google:
+        break
+    }
+} catch let error as AuthenticationError {
+    switch error {
+    case .userCancelled:
+        break // User tapped Cancel
+    default:
+        print("Error: \(error.localizedDescription)")
     }
 }
 ```
 
-### Paso 2: Crear la Vista de Login
+### Step 3: Add the Button
 
 ```swift
 import ARCAuthentication
 import SwiftUI
 
 struct LoginView: View {
-    @EnvironmentObject var authManager: AuthenticationManager
+    let provider = AppleCredentialProvider()
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Bienvenido")
-                .font(.largeTitle)
-
-            AppleSignInButton {
-                try await authManager.authenticate(with: "apple")
+        AppleSignInButton {
+            Task {
+                let credential = try await provider.requestCredential()
+                // Handle credential...
             }
-            .frame(width: 280, height: 50)
         }
+        .frame(height: 50)
     }
 }
 ```
 
-### Paso 3: Manejar el Estado de Autenticación
+## Google Sign-In
+
+To add Google Sign-In, import the `ARCAuthGoogle` target:
 
 ```swift
-struct ContentView: View {
-    @EnvironmentObject var authManager: AuthenticationManager
+import ARCAuthGoogle
 
-    var body: some View {
-        Group {
-            if authManager.state.isAuthenticated {
-                MainView()
-            } else {
-                LoginView()
-            }
-        }
-        .task {
-            await authManager.restoreSession()
-        }
-    }
-}
+let config = GoogleConfiguration(clientID: "your-client-id.apps.googleusercontent.com")
+let provider = GoogleCredentialProvider(configuration: config)
+let credential = try await provider.requestCredential()
 ```
 
-## Notas Importantes
+## Important Notes
 
-### Email y Nombre
+### Email and Name
 
-Apple solo proporciona el email y nombre del usuario en el **primer** Sign in. Asegúrate de guardar estos valores inmediatamente.
+Apple only provides the user's email and name on the **first** sign-in. Store these values immediately.
 
 ### Identity Token
 
-El `identityToken` es un JWT que debe verificarse en tu backend antes de confiar en él.
+The `identityToken` is a JWT that must be verified on your backend before trusting it.
 
-### Estado de Credenciales
+### Backend Integration
 
-Las credenciales de Apple pueden ser revocadas por el usuario en cualquier momento desde Configuración > Apple ID. Usa `restoreSession()` al iniciar la app para verificar el estado.
+ARCAuthentication only provides credentials. Your app is responsible for:
+- Sending credentials to your backend for verification
+- Managing user sessions and tokens
+- Storing authentication state

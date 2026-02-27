@@ -1,91 +1,73 @@
 # Adding New Providers
 
-Aprende a crear nuevos providers de autenticación.
+Create custom authentication providers by conforming to `CredentialProviding`.
 
 ## Overview
 
-ARCAuthentication usa una arquitectura protocol-oriented que facilita añadir nuevos métodos de autenticación.
+ARCAuthentication uses a protocol-oriented architecture that makes it easy to add new authentication methods.
 
-## Implementando AuthenticationProvider
+## Implementing CredentialProviding
 
-Para crear un nuevo provider, implementa el protocolo `AuthenticationProvider`:
+To create a new provider, conform to the ``CredentialProviding`` protocol:
 
 ```swift
-import ARCAuthClient
-import ARCAuthCore
+import ARCAuthentication
 
 @MainActor
-public final class GoogleAuthProvider: AuthenticationProvider {
+public final class EmailCredentialProvider: CredentialProviding, @unchecked Sendable {
+    public let providerType: AuthProviderType = .apple // or extend the enum
 
-    public let providerID: String = "google"
-    public let displayName: String = "Google"
+    public func requestCredential() async throws -> AuthCredential {
+        // Implement your sign-in flow...
+        let token = try await performEmailSignIn()
 
-    public var isAvailable: Bool {
-        // Verificar si Google Sign-In SDK está disponible
-        true
-    }
-
-    public func authenticate() async throws -> AuthCredential {
-        // Implementar flujo de Google Sign-In
-        // ...
-
-        return AuthCredential(
-            userID: googleUserID,
-            email: googleEmail,
-            displayName: googleDisplayName,
-            provider: .google,
-            identityToken: googleIDToken
-        )
-    }
-
-    public func signOut() async throws {
-        // Cerrar sesión de Google
-    }
-
-    public func checkCredentialState() async -> CredentialState {
-        // Verificar estado de la sesión
-        .authorized
+        return .apple(AppleCredential(
+            identityToken: token,
+            authorizationCode: code,
+            nonce: nonce,
+            userIdentifier: userID
+        ))
     }
 }
 ```
 
-## Registrando el Provider
-
-Una vez implementado, registra el provider en el `AuthenticationManager`:
+## Using the Provider
 
 ```swift
-let manager = AuthenticationManager()
-manager.register(provider: AppleAuthProvider())
-manager.register(provider: GoogleAuthProvider())
+let provider = EmailCredentialProvider()
+let credential = try await provider.requestCredential()
+// Send credential to your backend...
 ```
 
-## Usando el Provider
+## Testing
 
-Los usuarios pueden autenticarse con cualquier provider registrado:
+Use ``MockCredentialProvider`` to test code that depends on `CredentialProviding`:
 
 ```swift
-// Sign in with Apple
-try await authManager.authenticate(with: "apple")
+let mock = MockCredentialProvider(
+    providerType: .apple,
+    result: .success(.apple(.mock))
+)
 
-// Sign in with Google
-try await authManager.authenticate(with: "google")
+// Inject mock into your view model or service
+let viewModel = LoginViewModel(provider: mock)
+await viewModel.signIn()
+
+#expect(mock.requestCredentialCallCount == 1)
 ```
 
-## Consideraciones
+## Considerations
 
 ### Thread Safety
 
-Los providers deben ser `Sendable` y usar `@MainActor` para operaciones de UI.
+Providers must be `Sendable`. Use `@MainActor` for operations that require UI presentation and `@unchecked Sendable` if the class has mutable state guarded by the actor.
 
-### Manejo de Errores
+### Error Handling
 
-Lanza errores de tipo `AuthenticationError` para mantener consistencia:
+Throw ``AuthenticationError`` cases to maintain consistency:
 
 ```swift
-throw AuthenticationError.invalidCredentials
-throw AuthenticationError.unknown(underlying: originalError)
+throw AuthenticationError.userCancelled
+throw AuthenticationError.systemError("Network unavailable")
+throw AuthenticationError.invalidConfiguration("Missing API key")
 ```
-
-### Storage
-
-Las credenciales se guardan automáticamente en Keychain. No necesitas manejar el storage manualmente.

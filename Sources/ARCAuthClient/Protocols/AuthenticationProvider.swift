@@ -19,7 +19,6 @@ import Foundation
 ///
 /// ## Thread Safety
 /// All implementations must be `Sendable` and thread-safe.
-@MainActor
 public protocol AuthenticationProvider: Sendable {
     /// Unique provider identifier (e.g., "apple", "google", "email").
     var providerID: String { get }

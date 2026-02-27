@@ -5,8 +5,7 @@ import Foundation
 ///
 /// This implementation is a placeholder that will be completed
 /// when the Vapor backend is developed.
-@MainActor
-public final class AuthAPIClient: AuthAPIClientProtocol {
+public final class AuthAPIClient: AuthAPIClientProtocol, Sendable {
     // MARK: - Properties
 
     private let baseURL: URL

@@ -2,7 +2,6 @@ import ARCAuthCore
 import Foundation
 
 /// Protocol for communication with the authentication backend.
-@MainActor
 public protocol AuthAPIClientProtocol: Sendable {
     /// Sends Apple credentials to the server for verification.
     /// - Parameter payload: Apple authentication payload.

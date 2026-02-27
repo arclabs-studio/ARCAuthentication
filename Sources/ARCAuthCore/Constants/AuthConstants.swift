@@ -26,6 +26,12 @@ public enum AuthConstants {
         public static let defaultRefreshTokenDuration: TimeInterval = 2_592_000
     }
 
+    /// UserDefaults keys.
+    public enum Defaults {
+        /// Key for persisting the display name.
+        public static let displayNameKey = "auth.displayName"
+    }
+
     /// Apple Sign In configuration.
     public enum Apple {
         /// Default requested scopes.

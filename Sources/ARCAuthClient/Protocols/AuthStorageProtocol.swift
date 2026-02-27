@@ -4,7 +4,6 @@ import Foundation
 /// Protocol for secure credential storage.
 ///
 /// The default implementation uses Keychain via ARCStorage.
-@MainActor
 public protocol AuthStorageProtocol: Sendable {
     /// Saves the authentication credentials.
     func saveCredential(_ credential: AuthCredential) async throws

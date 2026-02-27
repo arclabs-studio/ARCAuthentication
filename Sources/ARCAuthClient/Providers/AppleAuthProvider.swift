@@ -28,6 +28,7 @@ public final class AppleAuthProvider: NSObject, AuthenticationProvider {
 
     private var authContinuation: CheckedContinuation<AuthCredential, Error>?
     private var currentNonce: String?
+    private var isAuthenticating = false
 
     // MARK: - Initialization
 
@@ -42,7 +43,14 @@ public final class AppleAuthProvider: NSObject, AuthenticationProvider {
     }
 
     public func authenticate() async throws -> AuthCredential {
-        try await withCheckedThrowingContinuation { continuation in
+        guard !isAuthenticating else {
+            throw AuthenticationError.appleSignInFailed(underlying: nil)
+        }
+
+        isAuthenticating = true
+        defer { isAuthenticating = false }
+
+        return try await withCheckedThrowingContinuation { continuation in
             self.authContinuation = continuation
             self.performAppleSignIn()
         }
@@ -214,14 +222,32 @@ extension AppleAuthProvider: ASAuthorizationControllerPresentationContextProvidi
     public nonisolated func presentationAnchor(
         for _: ASAuthorizationController
     ) -> ASPresentationAnchor {
-        guard let windowScene = UIApplication.shared.connectedScenes
-            .compactMap({ $0 as? UIWindowScene })
-            .first(where: { $0.activationState == .foregroundActive }),
-            let window = windowScene.windows.first(where: { $0.isKeyWindow })
-        else {
+        MainActor.assumeIsolated {
+            let scenes = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+
+            // Prefer: key window in active scene
+            if let activeScene = scenes.first(where: { $0.activationState == .foregroundActive }),
+               let keyWindow = activeScene.windows.first(where: { $0.isKeyWindow })
+            {
+                return keyWindow
+            }
+
+            // Fallback: any window in active scene
+            if let activeScene = scenes.first(where: { $0.activationState == .foregroundActive }),
+               let window = activeScene.windows.first
+            {
+                return window
+            }
+
+            // Fallback: any window in any scene
+            if let window = scenes.flatMap(\.windows).first {
+                return window
+            }
+
+            // Last resort
             return UIWindow()
         }
-        return window
     }
 }
 #endif

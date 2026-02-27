@@ -4,9 +4,9 @@ import Foundation
 
 @MainActor
 final class MockAuthenticationProvider: AuthenticationProvider {
-    let providerID: String
-    let displayName: String
-    var isAvailable = true
+    nonisolated let providerID: String
+    nonisolated let displayName: String
+    nonisolated(unsafe) var isAvailable = true
 
     var authenticateResult: Result<AuthCredential, Error> = .success(
         AuthCredential(userID: "mock_user", provider: .apple)

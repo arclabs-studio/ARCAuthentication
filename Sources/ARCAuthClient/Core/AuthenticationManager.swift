@@ -53,6 +53,7 @@ public final class AuthenticationManager {
     private let storage: any AuthStorageProtocol
     private let configuration: AuthenticationConfiguration
     private let logger: ARCLogger
+    @ObservationIgnored private nonisolated(unsafe) var credentialRevocationObserver: (any NSObjectProtocol)?
 
     // MARK: - Initialization
 
@@ -120,7 +121,7 @@ public final class AuthenticationManager {
             if configuration.persistDisplayNameInUserDefaults,
                let displayName = credential.displayName
             {
-                UserDefaults.standard.set(displayName, forKey: "auth.displayName")
+                UserDefaults.standard.set(displayName, forKey: AuthConstants.Defaults.displayNameKey)
             }
 
             // Update state
@@ -152,7 +153,7 @@ public final class AuthenticationManager {
             try await storage.deleteCredential()
 
             // Clear UserDefaults
-            UserDefaults.standard.removeObject(forKey: "auth.displayName")
+            UserDefaults.standard.removeObject(forKey: AuthConstants.Defaults.displayNameKey)
 
             state.setUnauthenticated()
             logger.info("Sign out successful")
@@ -215,7 +216,7 @@ public final class AuthenticationManager {
 
     /// Gets the saved displayName (even if there is no active session).
     public var savedDisplayName: String? {
-        UserDefaults.standard.string(forKey: "auth.displayName")
+        UserDefaults.standard.string(forKey: AuthConstants.Defaults.displayNameKey)
     }
 
     // MARK: - Credential Revocation
@@ -228,8 +229,10 @@ public final class AuthenticationManager {
     ///
     /// Call this method once at app launch.
     public func observeCredentialRevocation() {
+        stopObservingCredentialRevocation()
+
         #if canImport(AuthenticationServices)
-        NotificationCenter.default.addObserver(
+        credentialRevocationObserver = NotificationCenter.default.addObserver(
             forName: ASAuthorizationAppleIDProvider.credentialRevokedNotification,
             object: nil,
             queue: nil
@@ -238,10 +241,25 @@ public final class AuthenticationManager {
                 guard let self else { return }
                 logger.warning("Apple credential revocation notification received")
                 try? await storage.deleteCredential()
-                UserDefaults.standard.removeObject(forKey: "auth.displayName")
+                UserDefaults.standard.removeObject(forKey: AuthConstants.Defaults.displayNameKey)
                 state.setUnauthenticated()
             }
         }
         #endif
+    }
+
+    /// Stops observing Apple ID credential revocation notifications.
+    public func stopObservingCredentialRevocation() {
+        if let observer = credentialRevocationObserver {
+            NotificationCenter.default.removeObserver(observer)
+            credentialRevocationObserver = nil
+        }
+    }
+
+    deinit {
+        let observer = credentialRevocationObserver
+        if let observer {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 }

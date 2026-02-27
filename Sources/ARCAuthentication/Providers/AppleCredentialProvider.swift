@@ -16,18 +16,13 @@ public enum AppleAuthErrorMapper {
             return .systemError(error.localizedDescription)
         }
 
-        return switch authorizationError.code {
+        switch authorizationError.code {
         case .canceled:
-            .userCancelled
+            return .userCancelled
         case .invalidResponse:
-            .invalidIdentityToken
-        case .notHandled, .failed, .notInteractive, .matchedExcludedCredential:
-            .systemError(error.localizedDescription)
-        case .unknown, .credentialImport, .credentialExport,
-             .preferSignInWithApple, .deviceNotConfiguredForPasskeyCreation:
-            .systemError(error.localizedDescription)
-        @unknown default:
-            .unknown(error.localizedDescription)
+            return .invalidIdentityToken
+        default:
+            return .systemError(error.localizedDescription)
         }
     }
 }

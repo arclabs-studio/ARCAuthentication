@@ -5,23 +5,62 @@
 //  Created by ARC Labs Studio on 23/01/2026.
 //
 
-import ARCAuthClient
-import ARCAuthCore
+import ARCAuthentication
+import ARCAuthGoogle
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(AuthenticationManager.self) var authManager
+    @State private var credential: AuthCredential?
+    @State private var errorMessage: String?
+
+    private let appleProvider = AppleCredentialProvider()
+
+    /// Replace with your Google Cloud Console client ID to test
+    private let googleProvider = GoogleCredentialProvider(
+        configuration: GoogleConfiguration(
+            clientID: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+        )
+    )
 
     var body: some View {
         NavigationStack {
             Group {
-                if authManager.state.isAuthenticated {
-                    AuthenticatedView()
+                if let credential {
+                    AuthenticatedView(credential: credential) {
+                        self.credential = nil
+                        errorMessage = nil
+                    }
                 } else {
-                    LoginView()
+                    LoginView(
+                        errorMessage: errorMessage,
+                        onAppleSignIn: signInWithApple,
+                        onGoogleSignIn: signInWithGoogle
+                    )
                 }
             }
             .navigationTitle("ARCAuthentication")
+        }
+    }
+
+    private func signInWithApple() {
+        signIn(with: appleProvider)
+    }
+
+    private func signInWithGoogle() {
+        signIn(with: googleProvider)
+    }
+
+    private func signIn(with provider: some CredentialProviding) {
+        Task {
+            do {
+                credential = try await provider.requestCredential()
+                errorMessage = nil
+            } catch let error as AuthenticationError {
+                if case .userCancelled = error { return }
+                errorMessage = error.localizedDescription
+            } catch {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 }
@@ -29,7 +68,9 @@ struct ContentView: View {
 // MARK: - Login View
 
 struct LoginView: View {
-    @Environment(AuthenticationManager.self) var authManager
+    let errorMessage: String?
+    let onAppleSignIn: () -> Void
+    let onGoogleSignIn: () -> Void
 
     var body: some View {
         VStack(spacing: 32) {
@@ -48,12 +89,23 @@ struct LoginView: View {
                     .foregroundStyle(.secondary)
             }
 
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+
             Spacer()
 
-            AppleSignInButton {
-                try await authManager.authenticate(with: "apple")
+            VStack(spacing: 16) {
+                AppleSignInButton(action: onAppleSignIn)
+                    .frame(height: 50)
+
+                GoogleSignInButton(action: onGoogleSignIn)
+                    .frame(height: 50)
             }
-            .frame(height: 50)
             .padding(.horizontal, 32)
 
             Spacer()
@@ -62,10 +114,38 @@ struct LoginView: View {
     }
 }
 
+// MARK: - Google Sign-In Button
+
+struct GoogleSignInButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: "g.circle.fill")
+                    .font(.title2)
+                Text("Sign in with Google")
+                    .fontWeight(.medium)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 50)
+            .background(Color(.systemBackground))
+            .foregroundStyle(.primary)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color(.separator), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 // MARK: - Authenticated View
 
 struct AuthenticatedView: View {
-    @Environment(AuthenticationManager.self) var authManager
+    let credential: AuthCredential
+    let onSignOut: () -> Void
 
     var body: some View {
         VStack(spacing: 24) {
@@ -75,37 +155,18 @@ struct AuthenticatedView: View {
                 .font(.system(size: 80))
                 .foregroundStyle(.green)
 
-            Text("Authenticated!")
+            Text("Credential Obtained!")
                 .font(.largeTitle.bold())
 
-            if let credential = authManager.state.currentCredential {
-                VStack(spacing: 8) {
-                    InfoRow(label: "User ID", value: String(credential.userID.prefix(20)) + "...")
-                    InfoRow(label: "Provider", value: credential.provider.displayName)
-                    if let email = credential.email {
-                        InfoRow(label: "Email", value: email)
-                    }
-                    if let displayName = credential.displayName {
-                        InfoRow(label: "Name", value: displayName)
-                    }
-                }
+            credentialInfo
                 .padding()
                 .background(Color(.secondarySystemBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
 
             Spacer()
 
-            Button(role: .destructive) {
-                Task {
-                    do {
-                        try await authManager.signOut()
-                    } catch {
-                        print("Sign out failed: \(error.localizedDescription)")
-                    }
-                }
-            } label: {
-                Text("Sign Out")
+            Button(role: .destructive, action: onSignOut) {
+                Text("Clear Credential")
                     .frame(maxWidth: .infinity)
                     .padding()
             }
@@ -116,6 +177,35 @@ struct AuthenticatedView: View {
             Spacer()
         }
         .padding()
+    }
+
+    @ViewBuilder private var credentialInfo: some View {
+        switch credential {
+        case let .apple(apple):
+            VStack(spacing: 8) {
+                InfoRow(label: "Provider", value: "Apple")
+                InfoRow(label: "User ID", value: String(apple.userIdentifier.prefix(20)) + "...")
+                if let email = apple.email {
+                    InfoRow(label: "Email", value: email)
+                }
+                if let name = apple.fullName?.formatted() {
+                    InfoRow(label: "Name", value: name)
+                }
+            }
+        case let .google(google):
+            VStack(spacing: 8) {
+                InfoRow(label: "Provider", value: "Google")
+                if let name = google.displayName {
+                    InfoRow(label: "Name", value: name)
+                }
+                if let email = google.email {
+                    InfoRow(label: "Email", value: email)
+                }
+                if let photoURL = google.photoURL {
+                    InfoRow(label: "Photo", value: photoURL.absoluteString)
+                }
+            }
+        }
     }
 }
 
@@ -132,6 +222,8 @@ struct InfoRow: View {
             Spacer()
             Text(value)
                 .fontWeight(.medium)
+                .lineLimit(1)
+                .truncationMode(.middle)
         }
         .font(.subheadline)
     }
@@ -140,7 +232,5 @@ struct InfoRow: View {
 // MARK: - Previews
 
 #Preview("Login") {
-    let manager = AuthenticationManager()
     ContentView()
-        .environment(manager)
 }

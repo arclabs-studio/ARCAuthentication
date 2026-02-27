@@ -1,15 +1,17 @@
 # ``ARCAuthentication``
 
-Sistema de autenticación modular y reutilizable para apps de ARC Labs Studio.
+Backend-agnostic credential provider for Apple and Google authentication.
 
 ## Overview
 
-ARCAuthentication proporciona una arquitectura protocol-oriented que permite autenticación mediante Sign in with Apple (SIWA) con integración preparada para un backend Vapor.
+ARCAuthentication handles platform sign-in flows and returns provider-specific credentials that any backend can consume — Firebase, Vapor, Supabase, or your own.
 
-El paquete se divide en dos targets principales:
+The package provides two targets:
 
-- **ARCAuthCore**: DTOs compartidos que pueden usarse tanto en cliente como en servidor Vapor
-- **ARCAuthClient**: Cliente iOS con providers, storage y componentes UI
+- **ARCAuthentication**: Core library with Apple credential provider, models, and utilities
+- **ARCAuthGoogle**: Google Sign-In credential provider (requires GoogleSignIn SDK)
+
+A demo app is included in `Example/ARCAuthenticationDemo/` showcasing both Sign in with Apple and Google Sign-In with shared sign-in logic via the ``CredentialProviding`` protocol.
 
 ## Topics
 
@@ -18,26 +20,31 @@ El paquete se divide en dos targets principales:
 - <doc:GettingStarted>
 - <doc:AddingNewProviders>
 
-### Core Types
+### Protocols
+
+- ``CredentialProviding``
+
+### Providers
+
+- ``AppleCredentialProvider``
+- ``MockCredentialProvider``
+
+### Models
 
 - ``AuthCredential``
-- ``AuthProvider``
-- ``ServerTokens``
+- ``AppleCredential``
+- ``GoogleCredential``
+- ``AuthProviderType``
+- ``AuthenticationState``
+
+### Errors
+
 - ``AuthenticationError``
 
-### Client
+### Utilities
 
-- ``AuthenticationManager``
-- ``AuthenticationState``
-- ``AppleAuthProvider``
-- ``KeychainAuthStorage``
+- ``CryptoUtils``
 
 ### UI Components
 
 - ``AppleSignInButton``
-
-### Protocols
-
-- ``AuthenticationProvider``
-- ``AuthStorageProtocol``
-- ``AuthAPIClientProtocol``

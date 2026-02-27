@@ -1,6 +1,6 @@
 import Foundation
 
-/// Información extendida del perfil de usuario.
+/// Extended user profile information.
 public struct UserProfileDTO: Sendable, Codable, Identifiable, Equatable, Hashable {
     public let id: UUID
     public let email: String?
@@ -37,7 +37,7 @@ public struct UserProfileDTO: Sendable, Codable, Identifiable, Equatable, Hashab
         self.updatedAt = updatedAt
     }
 
-    /// Nombre completo formateado.
+    /// Formatted full name.
     public var fullName: String? {
         [firstName, lastName]
             .compactMap(\.self)

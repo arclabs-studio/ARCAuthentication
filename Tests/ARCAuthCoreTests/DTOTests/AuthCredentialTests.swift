@@ -1,132 +1,148 @@
 import Foundation
 import Testing
-
 @testable import ARCAuthCore
 
 @Suite("AuthCredential Tests")
 struct AuthCredentialTests {
-    @Test("Init with all parameters")
+    // MARK: - Factory
+
+    private func makeSUT(
+        userID: String = "user123",
+        email: String? = nil,
+        displayName: String? = nil,
+        profileImageURL: URL? = nil,
+        provider: AuthProvider = .apple,
+        identityToken: Data? = nil,
+        authorizationCode: Data? = nil,
+        serverTokens: ServerTokens? = nil,
+        createdAt: Date = Date()
+    ) -> AuthCredential {
+        AuthCredential(
+            userID: userID,
+            email: email,
+            displayName: displayName,
+            profileImageURL: profileImageURL,
+            provider: provider,
+            identityToken: identityToken,
+            authorizationCode: authorizationCode,
+            serverTokens: serverTokens,
+            createdAt: createdAt
+        )
+    }
+
+    // MARK: - Initialization
+
+    @Test("Should initialize with all parameters", .tags(.unit))
     func initWithAllParameters() {
-        let credential = AuthCredential(
-            userID: "user123",
+        // Given / When
+        let sut = makeSUT(
             email: "test@example.com",
             displayName: "Test User",
             profileImageURL: URL(string: "https://example.com/image.jpg"),
-            provider: .apple,
             identityToken: Data("token".utf8),
-            authorizationCode: Data("code".utf8),
-            serverTokens: nil,
-            createdAt: Date()
+            authorizationCode: Data("code".utf8)
         )
 
-        #expect(credential.userID == "user123")
-        #expect(credential.email == "test@example.com")
-        #expect(credential.displayName == "Test User")
-        #expect(credential.provider == .apple)
-        #expect(credential.identityToken != nil)
-        #expect(credential.authorizationCode != nil)
+        // Then
+        #expect(sut.userID == "user123")
+        #expect(sut.email == "test@example.com")
+        #expect(sut.displayName == "Test User")
+        #expect(sut.provider == .apple)
+        #expect(sut.identityToken != nil)
+        #expect(sut.authorizationCode != nil)
     }
 
-    @Test("Init with minimal parameters")
+    @Test("Should initialize with minimal parameters", .tags(.unit))
     func initWithMinimalParameters() {
-        let credential = AuthCredential(
-            userID: "user123",
-            provider: .apple
-        )
+        // Given / When
+        let sut = makeSUT()
 
-        #expect(credential.userID == "user123")
-        #expect(credential.email == nil)
-        #expect(credential.displayName == nil)
-        #expect(credential.provider == .apple)
+        // Then
+        #expect(sut.userID == "user123")
+        #expect(sut.email == nil)
+        #expect(sut.displayName == nil)
+        #expect(sut.provider == .apple)
     }
 
-    @Test("Codable round-trip")
+    // MARK: - Codable
+
+    @Test("Should encode and decode correctly", .tags(.unit))
     func codableRoundTrip() throws {
-        let original = AuthCredential(
-            userID: "user123",
+        // Given
+        let sut = makeSUT(
             email: "test@example.com",
             displayName: "Test User",
-            provider: .apple,
             identityToken: Data("token".utf8)
         )
 
+        // When
         let encoder = JSONEncoder()
-        let data = try encoder.encode(original)
+        let data = try encoder.encode(sut)
 
         let decoder = JSONDecoder()
         let decoded = try decoder.decode(AuthCredential.self, from: data)
 
-        #expect(decoded == original)
+        // Then
+        #expect(decoded == sut)
     }
 
-    @Test("Equatable")
+    // MARK: - Equatable
+
+    @Test("Should be equal when properties match", .tags(.unit))
     func equatable() {
+        // Given
         let fixedDate = Date(timeIntervalSince1970: 1_000_000)
 
-        let credential1 = AuthCredential(
-            userID: "user123",
-            provider: .apple,
-            createdAt: fixedDate
-        )
+        let credential1 = makeSUT(createdAt: fixedDate)
+        let credential2 = makeSUT(createdAt: fixedDate)
+        let credential3 = makeSUT(userID: "user456", createdAt: fixedDate)
 
-        let credential2 = AuthCredential(
-            userID: "user123",
-            provider: .apple,
-            createdAt: fixedDate
-        )
-
-        let credential3 = AuthCredential(
-            userID: "user456",
-            provider: .apple,
-            createdAt: fixedDate
-        )
-
+        // When / Then
         #expect(credential1 == credential2)
         #expect(credential1 != credential3)
     }
 
-    @Test("Hashable")
+    // MARK: - Hashable
+
+    @Test("Should deduplicate in Set when equal", .tags(.unit))
     func hashable() {
+        // Given
         let fixedDate = Date(timeIntervalSince1970: 1_000_000)
 
-        let credential1 = AuthCredential(
-            userID: "user123",
-            provider: .apple,
-            createdAt: fixedDate
-        )
+        let credential1 = makeSUT(createdAt: fixedDate)
+        let credential2 = makeSUT(createdAt: fixedDate)
 
-        let credential2 = AuthCredential(
-            userID: "user123",
-            provider: .apple,
-            createdAt: fixedDate
-        )
-
+        // When
         var set = Set<AuthCredential>()
         set.insert(credential1)
         set.insert(credential2)
 
+        // Then
         #expect(set.count == 1)
     }
 }
 
 @Suite("AuthProvider Tests")
 struct AuthProviderTests {
-    @Test("Display names")
+    @Test("Should return correct display names", .tags(.unit))
     func displayNames() {
+        // Given / When / Then
         #expect(AuthProvider.apple.displayName == "Apple")
         #expect(AuthProvider.google.displayName == "Google")
         #expect(AuthProvider.email.displayName == "Email")
     }
 
-    @Test("Raw values")
+    @Test("Should have correct raw values", .tags(.unit))
     func rawValues() {
+        // Given / When / Then
         #expect(AuthProvider.apple.rawValue == "apple")
         #expect(AuthProvider.google.rawValue == "google")
         #expect(AuthProvider.email.rawValue == "email")
     }
 
-    @Test("All cases")
+    @Test("Should contain all expected cases", .tags(.unit))
     func allCases() {
+        // Given / When / Then
         #expect(AuthProvider.allCases.count == 3)
         #expect(AuthProvider.allCases.contains(.apple))
         #expect(AuthProvider.allCases.contains(.google))
@@ -136,47 +152,55 @@ struct AuthProviderTests {
 
 @Suite("ServerTokens Tests")
 struct ServerTokensTests {
-    @Test("isExpired returns true for past date")
+    // MARK: - Factory
+
+    private func makeSUT(
+        accessToken: String = "access",
+        refreshToken: String = "refresh",
+        expiresAt: Date = Date().addingTimeInterval(3600)
+    ) -> ServerTokens {
+        ServerTokens(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            expiresAt: expiresAt
+        )
+    }
+
+    // MARK: - Expiration
+
+    @Test("Should return expired when date is in the past", .tags(.unit))
     func isExpiredTrue() {
-        let tokens = ServerTokens(
-            accessToken: "access",
-            refreshToken: "refresh",
-            expiresAt: Date().addingTimeInterval(-60)
-        )
+        // Given
+        let sut = makeSUT(expiresAt: Date().addingTimeInterval(-60))
 
-        #expect(tokens.isExpired == true)
+        // When / Then
+        #expect(sut.isExpired == true)
     }
 
-    @Test("isExpired returns false for future date")
+    @Test("Should return not expired when date is in the future", .tags(.unit))
     func isExpiredFalse() {
-        let tokens = ServerTokens(
-            accessToken: "access",
-            refreshToken: "refresh",
-            expiresAt: Date().addingTimeInterval(3600)
-        )
+        // Given
+        let sut = makeSUT(expiresAt: Date().addingTimeInterval(3600))
 
-        #expect(tokens.isExpired == false)
+        // When / Then
+        #expect(sut.isExpired == false)
     }
 
-    @Test("willExpireSoon returns true within 5 minutes")
+    @Test("Should return expiring soon within 5 minutes", .tags(.unit))
     func willExpireSoonTrue() {
-        let tokens = ServerTokens(
-            accessToken: "access",
-            refreshToken: "refresh",
-            expiresAt: Date().addingTimeInterval(120)
-        )
+        // Given
+        let sut = makeSUT(expiresAt: Date().addingTimeInterval(120))
 
-        #expect(tokens.willExpireSoon == true)
+        // When / Then
+        #expect(sut.willExpireSoon == true)
     }
 
-    @Test("willExpireSoon returns false beyond 5 minutes")
+    @Test("Should return not expiring soon beyond 5 minutes", .tags(.unit))
     func willExpireSoonFalse() {
-        let tokens = ServerTokens(
-            accessToken: "access",
-            refreshToken: "refresh",
-            expiresAt: Date().addingTimeInterval(600)
-        )
+        // Given
+        let sut = makeSUT(expiresAt: Date().addingTimeInterval(600))
 
-        #expect(tokens.willExpireSoon == false)
+        // When / Then
+        #expect(sut.willExpireSoon == false)
     }
 }

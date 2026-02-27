@@ -1,37 +1,43 @@
 import Foundation
 
-/// Constantes utilizadas en el sistema de autenticación.
+/// Constants used in the authentication system.
 public enum AuthConstants {
-    /// Configuración del Keychain.
+    /// Keychain configuration.
     public enum Keychain {
-        /// Service identifier para el Keychain.
+        /// Service identifier for Keychain.
         public static let service = "com.arclabs.authentication"
 
-        /// Key para almacenar credenciales.
+        /// Key for storing credentials.
         public static let credentialKey = "auth.credential"
 
-        /// Key para almacenar el userID.
+        /// Key for storing the userID.
         public static let userIDKey = "auth.user_id"
     }
 
-    /// Configuración de tokens.
+    /// Token configuration.
     public enum Token {
-        /// Tiempo antes de expiración para considerar refresh (5 minutos).
+        /// Time before expiration to consider refresh (5 minutes).
         public static let refreshThreshold: TimeInterval = 300
 
-        /// Duración por defecto del access token (1 hora).
+        /// Default access token duration (1 hour).
         public static let defaultAccessTokenDuration: TimeInterval = 3600
 
-        /// Duración por defecto del refresh token (30 días).
+        /// Default refresh token duration (30 days).
         public static let defaultRefreshTokenDuration: TimeInterval = 2_592_000
     }
 
-    /// Configuración de Apple Sign In.
+    /// UserDefaults keys.
+    public enum Defaults {
+        /// Key for persisting the display name.
+        public static let displayNameKey = "auth.displayName"
+    }
+
+    /// Apple Sign In configuration.
     public enum Apple {
-        /// Scopes solicitados por defecto.
+        /// Default requested scopes.
         public static let defaultScopes: [String] = ["fullName", "email"]
 
-        /// Tiempo de expiración del authorization code (5 minutos).
+        /// Authorization code expiration time (5 minutes).
         public static let authorizationCodeExpiration: TimeInterval = 300
     }
 }

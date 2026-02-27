@@ -1,8 +1,8 @@
 import Foundation
 
-/// Request para renovar el access token usando el refresh token.
+/// Request to renew the access token using the refresh token.
 public struct RefreshTokenRequest: Sendable, Codable {
-    /// Refresh token válido.
+    /// Valid refresh token.
     public let refreshToken: String
 
     public init(refreshToken: String) {

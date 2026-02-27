@@ -1,60 +1,60 @@
 import Foundation
 
-/// Errores del sistema de autenticación.
+/// Authentication system errors.
 public enum AuthenticationError: LocalizedError, Sendable {
     // MARK: - Provider Errors
 
-    /// El provider especificado no está registrado.
+    /// The specified provider is not registered.
     case providerNotRegistered(String)
 
-    /// Error específico del provider de Apple.
+    /// Apple provider-specific error.
     case appleSignInFailed(underlying: Error?)
 
-    /// El usuario canceló la autenticación.
+    /// The user cancelled authentication.
     case userCancelled
 
-    /// Las credenciales proporcionadas son inválidas.
+    /// The provided credentials are invalid.
     case invalidCredentials
 
     // MARK: - Token Errors
 
-    /// El identity token no es válido o está corrupto.
+    /// The identity token is invalid or corrupted.
     case invalidIdentityToken
 
-    /// El token de acceso ha expirado.
+    /// The access token has expired.
     case tokenExpired
 
-    /// No se pudo refrescar el token.
+    /// Failed to refresh the token.
     case tokenRefreshFailed(underlying: Error?)
 
     // MARK: - Storage Errors
 
-    /// Error al guardar en Keychain.
+    /// Error saving to Keychain.
     case storageSaveFailed(underlying: Error?)
 
-    /// Error al leer de Keychain.
+    /// Error reading from Keychain.
     case storageReadFailed(underlying: Error?)
 
-    /// Error al eliminar de Keychain.
+    /// Error deleting from Keychain.
     case storageDeleteFailed(underlying: Error?)
 
     // MARK: - Network Errors
 
-    /// Error de red al comunicarse con el servidor.
+    /// Network error communicating with the server.
     case networkError(underlying: Error?)
 
-    /// El servidor retornó un error.
+    /// The server returned an error.
     case serverError(statusCode: Int, message: String?)
 
     // MARK: - State Errors
 
-    /// No hay sesión activa.
+    /// No active session.
     case noActiveSession
 
-    /// El estado de credenciales de Apple fue revocado.
+    /// Apple ID credential state was revoked.
     case credentialRevoked
 
-    /// Error desconocido.
+    /// Unknown error.
     case unknown(underlying: Error?)
 
     // MARK: - LocalizedError

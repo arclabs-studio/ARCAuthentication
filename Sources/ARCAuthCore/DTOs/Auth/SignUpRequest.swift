@@ -1,14 +1,14 @@
 import Foundation
 
-/// Request para registro con email/password.
+/// Request for email/password registration.
 public struct SignUpRequest: Sendable, Codable {
-    /// Email del usuario.
+    /// User email.
     public let email: String
 
-    /// Password del usuario.
+    /// User password.
     public let password: String
 
-    /// Nombre para mostrar (opcional).
+    /// Display name (optional).
     public let displayName: String?
 
     public init(email: String, password: String, displayName: String? = nil) {

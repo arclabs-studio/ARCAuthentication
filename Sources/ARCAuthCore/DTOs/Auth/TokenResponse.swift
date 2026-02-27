@@ -1,22 +1,22 @@
 import Foundation
 
-/// Respuesta del servidor después de autenticación exitosa.
+/// Server response after successful authentication.
 ///
-/// Contiene los tokens de sesión y la información del usuario.
+/// Contains the session tokens and user information.
 public struct TokenResponse: Sendable, Codable {
-    /// JWT de acceso para autenticar requests.
+    /// Access JWT for authenticating requests.
     public let accessToken: String
 
-    /// Token para renovar el access token.
+    /// Token for renewing the access token.
     public let refreshToken: String
 
-    /// Segundos hasta que expire el access token.
+    /// Seconds until the access token expires.
     public let expiresIn: Int
 
-    /// Tipo de token (siempre "Bearer").
+    /// Token type (always "Bearer").
     public let tokenType: String
 
-    /// Información del usuario autenticado.
+    /// Authenticated user information.
     public let user: UserDTO
 
     public init(
@@ -33,7 +33,7 @@ public struct TokenResponse: Sendable, Codable {
         self.user = user
     }
 
-    /// Calcula la fecha de expiración basada en `expiresIn`.
+    /// Calculates the expiration date based on `expiresIn`.
     public var expiresAt: Date {
         Date().addingTimeInterval(TimeInterval(expiresIn))
     }

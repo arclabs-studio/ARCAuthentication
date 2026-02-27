@@ -1,28 +1,28 @@
 import Foundation
 
-/// Payload enviado al backend para verificación de Sign in with Apple.
+/// Payload sent to the backend for Sign in with Apple verification.
 ///
-/// Contiene toda la información necesaria para que el servidor:
-/// 1. Verifique el JWT con Apple
-/// 2. Cree o actualice el usuario en la base de datos
-/// 3. Genere tokens de sesión propios
+/// Contains all the information needed for the server to:
+/// 1. Verify the JWT with Apple
+/// 2. Create or update the user in the database
+/// 3. Generate its own session tokens
 public struct AppleAuthPayload: Sendable, Codable {
-    /// Identity token JWT de Apple (codificado en Base64).
+    /// Apple identity token JWT (Base64-encoded).
     public let identityToken: String
 
-    /// Código de autorización para intercambio server-to-server.
+    /// Authorization code for server-to-server exchange.
     public let authorizationCode: String
 
-    /// Nombre completo del usuario (solo primer auth).
+    /// User's full name (first auth only).
     public let fullName: FullName?
 
-    /// Email del usuario (solo primer auth).
+    /// User email (first auth only).
     public let email: String?
 
-    /// Identificador único del usuario de Apple.
+    /// Apple's unique user identifier.
     public let userIdentifier: String
 
-    /// Indica si es una cuenta real vs bot (Apple's fraud detection).
+    /// Whether this is a real account vs bot (Apple's fraud detection).
     public let realUserStatus: RealUserStatus
 
     public init(
@@ -55,7 +55,7 @@ public struct FullName: Sendable, Codable {
         self.nickname = nickname
     }
 
-    /// Nombre completo formateado.
+    /// Formatted full name.
     public var formatted: String? {
         [givenName, familyName]
             .compactMap(\.self)

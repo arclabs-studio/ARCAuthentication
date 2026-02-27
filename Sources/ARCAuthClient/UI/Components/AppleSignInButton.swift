@@ -3,11 +3,11 @@ import ARCAuthCore
 import AuthenticationServices
 import SwiftUI
 
-/// Botón de Sign in with Apple siguiendo Human Interface Guidelines.
+/// Sign in with Apple button following Human Interface Guidelines.
 ///
-/// Wrapper de SwiftUI sobre `SignInWithAppleButton` con estilos adicionales.
+/// SwiftUI wrapper over `SignInWithAppleButton` with additional styles.
 ///
-/// ## Uso
+/// ## Usage
 /// ```swift
 /// AppleSignInButton {
 ///     try await authManager.authenticate(with: "apple")
@@ -29,12 +29,12 @@ public struct AppleSignInButton: View {
 
     // MARK: - Initialization
 
-    /// Crea un botón de Sign in with Apple.
+    /// Creates a Sign in with Apple button.
     /// - Parameters:
-    ///   - type: Tipo de botón (signIn, signUp, continue).
-    ///   - style: Estilo visual (black, white, whiteOutline).
-    ///   - cornerRadius: Radio de esquinas (default: 8).
-    ///   - onRequest: Closure ejecutado al tocar el botón.
+    ///   - type: Button type (signIn, signUp, continue).
+    ///   - style: Visual style (black, white, whiteOutline).
+    ///   - cornerRadius: Corner radius (default: 8).
+    ///   - onRequest: Closure executed when the button is tapped.
     public init(
         type: SignInWithAppleButton.Label = .signIn,
         style: SignInWithAppleButton.Style = .black,
@@ -46,15 +46,10 @@ public struct AppleSignInButton: View {
         self.cornerRadius = cornerRadius
         self.onRequest = onRequest
 
-        // Determinar el color del tint basado en el estilo
-        // .black usa tint blanco, .white y .whiteOutline usan tint negro
-        var isBlack = true
-        if #available(iOS 14.0, *) {
-            // Usamos reflexión para determinar el estilo ya que no es Equatable
-            let styleDescription = String(describing: style)
-            isBlack = styleDescription.contains("black")
-        }
-        useWhiteTint = isBlack
+        // Determine tint color based on the style
+        // .black uses white tint, .white and .whiteOutline use black tint
+        let styleDescription = String(describing: style)
+        useWhiteTint = styleDescription.contains("black")
     }
 
     // MARK: - Body
@@ -65,16 +60,12 @@ public struct AppleSignInButton: View {
         } label: {
             SignInWithAppleButton(
                 type,
-                onRequest: { _ in
-                    // No usamos el handler de request
-                },
-                onCompletion: { _ in
-                    // No usamos el handler de completion
-                }
+                onRequest: { _ in },
+                onCompletion: { _ in }
             )
             .signInWithAppleButtonStyle(style)
             .frame(height: 50)
-            .cornerRadius(cornerRadius)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .allowsHitTesting(false)
         }
         .buttonStyle(.plain)
@@ -109,7 +100,7 @@ public struct AppleSignInButton: View {
                 try await onRequest()
             } catch let error as AuthenticationError {
                 if case .userCancelled = error {
-                    // No mostrar error si el usuario canceló
+                    // Don't show error if the user cancelled
                     return
                 }
                 errorMessage = error.localizedDescription

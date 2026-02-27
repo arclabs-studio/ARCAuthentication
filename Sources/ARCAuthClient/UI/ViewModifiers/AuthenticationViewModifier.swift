@@ -1,9 +1,9 @@
 #if canImport(SwiftUI)
 import SwiftUI
 
-/// ViewModifier para manejar estado de autenticación.
+/// ViewModifier to handle authentication state.
 ///
-/// ## Uso
+/// ## Usage
 /// ```swift
 /// ContentView()
 ///     .withAuthentication(manager: authManager) {
@@ -11,7 +11,7 @@ import SwiftUI
 ///     }
 /// ```
 public struct AuthenticationViewModifier<UnauthContent: View>: ViewModifier {
-    @ObservedObject private var manager: AuthenticationManager
+    private let manager: AuthenticationManager
     private let unauthContent: () -> UnauthContent
 
     public init(
@@ -37,20 +37,18 @@ public struct AuthenticationViewModifier<UnauthContent: View>: ViewModifier {
 }
 
 extension View {
-    /// Aplica el modificador de autenticación.
+    /// Applies the authentication modifier.
     /// - Parameters:
-    ///   - manager: Manager de autenticación.
-    ///   - unauthContent: Vista a mostrar cuando no hay sesión.
+    ///   - manager: Authentication manager.
+    ///   - unauthContent: View to show when there is no session.
     public func withAuthentication(
         manager: AuthenticationManager,
         @ViewBuilder unauthContent: @escaping () -> some View
     ) -> some View {
-        modifier(
-            AuthenticationViewModifier(
-                manager: manager,
-                unauthContent: unauthContent
-            )
-        )
+        modifier(AuthenticationViewModifier(
+            manager: manager,
+            unauthContent: unauthContent
+        ))
     }
 }
 #endif

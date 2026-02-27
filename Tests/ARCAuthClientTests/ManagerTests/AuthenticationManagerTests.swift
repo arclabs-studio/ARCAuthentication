@@ -3,10 +3,6 @@ import Testing
 @testable import ARCAuthClient
 @testable import ARCAuthCore
 
-extension Tag {
-    @Tag static var unit: Self
-}
-
 @Suite("AuthenticationManager Tests")
 @MainActor
 struct AuthenticationManagerTests {

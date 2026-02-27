@@ -6,6 +6,7 @@
 //
 
 import ARCAuthentication
+import ARCAuthGoogle
 import SwiftUI
 
 struct ContentView: View {
@@ -14,17 +15,26 @@ struct ContentView: View {
 
     private let appleProvider = AppleCredentialProvider()
 
+    /// Replace with your Google Cloud Console client ID to test
+    private let googleProvider = GoogleCredentialProvider(
+        configuration: GoogleConfiguration(
+            clientID: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+        )
+    )
+
     var body: some View {
         NavigationStack {
             Group {
                 if let credential {
                     AuthenticatedView(credential: credential) {
                         self.credential = nil
+                        errorMessage = nil
                     }
                 } else {
                     LoginView(
                         errorMessage: errorMessage,
-                        onSignIn: signIn
+                        onAppleSignIn: signInWithApple,
+                        onGoogleSignIn: signInWithGoogle
                     )
                 }
             }
@@ -32,10 +42,18 @@ struct ContentView: View {
         }
     }
 
-    private func signIn() {
+    private func signInWithApple() {
+        signIn(with: appleProvider)
+    }
+
+    private func signInWithGoogle() {
+        signIn(with: googleProvider)
+    }
+
+    private func signIn(with provider: some CredentialProviding) {
         Task {
             do {
-                credential = try await appleProvider.requestCredential()
+                credential = try await provider.requestCredential()
                 errorMessage = nil
             } catch let error as AuthenticationError {
                 if case .userCancelled = error { return }
@@ -51,7 +69,8 @@ struct ContentView: View {
 
 struct LoginView: View {
     let errorMessage: String?
-    let onSignIn: () -> Void
+    let onAppleSignIn: () -> Void
+    let onGoogleSignIn: () -> Void
 
     var body: some View {
         VStack(spacing: 32) {
@@ -80,13 +99,45 @@ struct LoginView: View {
 
             Spacer()
 
-            AppleSignInButton(action: onSignIn)
-                .frame(height: 50)
-                .padding(.horizontal, 32)
+            VStack(spacing: 16) {
+                AppleSignInButton(action: onAppleSignIn)
+                    .frame(height: 50)
+
+                GoogleSignInButton(action: onGoogleSignIn)
+                    .frame(height: 50)
+            }
+            .padding(.horizontal, 32)
 
             Spacer()
         }
         .padding()
+    }
+}
+
+// MARK: - Google Sign-In Button
+
+struct GoogleSignInButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: "g.circle.fill")
+                    .font(.title2)
+                Text("Sign in with Google")
+                    .fontWeight(.medium)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 50)
+            .background(Color(.systemBackground))
+            .foregroundStyle(.primary)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color(.separator), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -150,6 +201,9 @@ struct AuthenticatedView: View {
                 if let email = google.email {
                     InfoRow(label: "Email", value: email)
                 }
+                if let photoURL = google.photoURL {
+                    InfoRow(label: "Photo", value: photoURL.absoluteString)
+                }
             }
         }
     }
@@ -168,6 +222,8 @@ struct InfoRow: View {
             Spacer()
             Text(value)
                 .fontWeight(.medium)
+                .lineLimit(1)
+                .truncationMode(.middle)
         }
         .font(.subheadline)
     }

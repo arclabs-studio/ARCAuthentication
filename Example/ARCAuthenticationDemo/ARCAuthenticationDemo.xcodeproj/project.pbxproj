@@ -92,6 +92,7 @@
 			name = ARCAuthenticationDemo;
 			packageProductDependencies = (
 				8A1234560000000000000070 /* ARCAuthentication */,
+				8A1234560000000000000071 /* ARCAuthGoogle */,
 			);
 			productName = ARCAuthenticationDemo;
 			productReference = 8A1234560000000000000001 /* ARCAuthenticationDemo.app */;
@@ -368,6 +369,10 @@
 		8A1234560000000000000070 /* ARCAuthentication */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ARCAuthentication;
+		};
+		8A1234560000000000000071 /* ARCAuthGoogle */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ARCAuthGoogle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,17 +1,17 @@
 import Foundation
 
-/// Configuración para el sistema de autenticación.
+/// Configuration for the authentication system.
 public struct AuthenticationConfiguration: Sendable {
-    /// URL base del servidor de autenticación (para futuro uso con backend).
+    /// Base URL of the authentication server (for future use with backend).
     public let serverBaseURL: URL?
 
-    /// Indica si se debe verificar credenciales de Apple al restaurar sesión.
+    /// Whether to verify Apple credentials when restoring session.
     public let verifyAppleCredentialsOnRestore: Bool
 
-    /// Indica si se debe persistir el displayName en UserDefaults.
+    /// Whether to persist the displayName in UserDefaults.
     public let persistDisplayNameInUserDefaults: Bool
 
-    /// Configuración por defecto.
+    /// Default configuration.
     public static let `default` = AuthenticationConfiguration(
         serverBaseURL: nil,
         verifyAppleCredentialsOnRestore: true,

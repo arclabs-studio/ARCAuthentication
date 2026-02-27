@@ -1,6 +1,6 @@
 import Foundation
 
-/// Información del usuario para transferencia entre cliente y servidor.
+/// User information for transfer between client and server.
 public struct UserDTO: Sendable, Codable, Identifiable, Equatable, Hashable {
     public let id: UUID
     public let email: String?

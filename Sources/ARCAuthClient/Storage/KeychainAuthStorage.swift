@@ -2,17 +2,17 @@ import ARCAuthCore
 import ARCStorage
 import Foundation
 
-/// Implementación de almacenamiento de credenciales usando Keychain.
+/// Credential storage implementation using Keychain.
 ///
-/// Utiliza `KeychainRepository` de ARCStorage para el acceso seguro a Keychain.
+/// Uses `KeychainRepository` from ARCStorage for secure Keychain access.
 ///
-/// ## Nivel de Seguridad
-/// Usa `.whenUnlockedThisDeviceOnly` por defecto:
-/// - Solo accesible cuando el dispositivo está desbloqueado
-/// - NO se sincroniza a otros dispositivos (seguridad)
-/// - Las credenciales se eliminan si se borra la app
+/// ## Security Level
+/// Uses `.whenUnlockedThisDeviceOnly` by default:
+/// - Only accessible when the device is unlocked
+/// - NOT synced to other devices (security)
+/// - Credentials are deleted if the app is removed
 ///
-/// ## Uso
+/// ## Usage
 /// ```swift
 /// let storage = KeychainAuthStorage()
 /// try await storage.saveCredential(credential)
@@ -26,7 +26,7 @@ public final class KeychainAuthStorage: AuthStorageProtocol {
 
     // MARK: - Initialization
 
-    /// Inicializa el storage con el nivel de seguridad por defecto.
+    /// Initializes the storage with the default security level.
     public init() {
         repository = KeychainRepository<AuthCredential>(
             service: AuthConstants.Keychain.service,
@@ -34,8 +34,8 @@ public final class KeychainAuthStorage: AuthStorageProtocol {
         )
     }
 
-    /// Inicializa el storage con un nivel de seguridad personalizado.
-    /// - Parameter accessibility: Nivel de accesibilidad del Keychain.
+    /// Initializes the storage with a custom security level.
+    /// - Parameter accessibility: Keychain accessibility level.
     public init(accessibility: KeychainAccessibility) {
         repository = KeychainRepository<AuthCredential>(
             service: AuthConstants.Keychain.service,
@@ -43,8 +43,8 @@ public final class KeychainAuthStorage: AuthStorageProtocol {
         )
     }
 
-    /// Inicializa el storage con un repository custom (útil para testing).
-    /// - Parameter repository: Repository a utilizar.
+    /// Initializes the storage with a custom repository (useful for testing).
+    /// - Parameter repository: Repository to use.
     init(repository: KeychainRepository<AuthCredential>) {
         self.repository = repository
     }
@@ -53,12 +53,12 @@ public final class KeychainAuthStorage: AuthStorageProtocol {
 
     public func saveCredential(_ credential: AuthCredential) async throws {
         do {
-            // Primero eliminamos cualquier credencial existente
+            // First delete any existing credential
             let existing = try await repository.fetchAll()
             for old in existing {
                 try await repository.delete(id: old.id)
             }
-            // Guardamos la nueva credencial
+            // Save the new credential
             try await repository.save(credential)
         } catch {
             throw AuthenticationError.storageSaveFailed(underlying: error)
@@ -70,7 +70,7 @@ public final class KeychainAuthStorage: AuthStorageProtocol {
             let credentials = try await repository.fetchAll()
             return credentials.first
         } catch {
-            // Si no existe, retornar nil en lugar de error
+            // If not found, return nil instead of error
             return nil
         }
     }

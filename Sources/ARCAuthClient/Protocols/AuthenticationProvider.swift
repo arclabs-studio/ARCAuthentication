@@ -1,68 +1,73 @@
 import ARCAuthCore
 import Foundation
 
-/// Protocolo que define el contrato para cualquier provider de autenticación.
+/// Protocol that defines the contract for any authentication provider.
 ///
-/// Implementa este protocolo para añadir nuevos métodos de autenticación
-/// (ej: Google, Facebook, Email/Password, etc.).
+/// Implement this protocol to add new authentication methods
+/// (e.g., Google, Facebook, Email/Password, etc.).
 ///
-/// ## Implementación
+/// ## Implementation
 /// ```swift
 /// public final class MyAuthProvider: AuthenticationProvider {
 ///     public let providerID: String = "my_provider"
 ///
 ///     public func authenticate() async throws -> AuthCredential {
-///         // Implementación específica
+///         // Provider-specific implementation
 ///     }
 /// }
 /// ```
 ///
 /// ## Thread Safety
-/// Todas las implementaciones deben ser `Sendable` y thread-safe.
+/// All implementations must be `Sendable` and thread-safe.
 @MainActor
 public protocol AuthenticationProvider: Sendable {
-    /// Identificador único del provider (ej: "apple", "google", "email").
+    /// Unique provider identifier (e.g., "apple", "google", "email").
     var providerID: String { get }
 
-    /// Nombre para mostrar en UI.
+    /// Display name for UI.
     var displayName: String { get }
 
-    /// Indica si el provider está disponible en el dispositivo actual.
+    /// Whether the provider is available on the current device.
     var isAvailable: Bool { get }
 
-    /// Ejecuta el flujo de autenticación.
-    /// - Returns: Credenciales del usuario autenticado.
-    /// - Throws: `AuthenticationError` si la autenticación falla.
+    /// Executes the authentication flow.
+    /// - Returns: Credentials of the authenticated user.
+    /// - Throws: `AuthenticationError` if authentication fails.
     func authenticate() async throws -> AuthCredential
 
-    /// Cierra la sesión del provider.
+    /// Signs out from the provider.
     func signOut() async throws
 
-    /// Verifica si hay una sesión activa válida.
+    /// Checks whether there is a valid active session.
     func checkCredentialState() async -> CredentialState
 }
 
 // MARK: - Default Implementations
 
 extension AuthenticationProvider {
-    public var displayName: String { providerID.capitalized }
-    public var isAvailable: Bool { true }
+    public var displayName: String {
+        providerID.capitalized
+    }
+
+    public var isAvailable: Bool {
+        true
+    }
 
     public func signOut() async throws {
-        // Default: no-op (muchos providers no requieren sign out explícito)
+        // Default: no-op (many providers don't require explicit sign out)
     }
 }
 
 // MARK: - Credential State
 
-/// Estado de las credenciales del usuario.
+/// User credential state.
 public enum CredentialState: Sendable, Equatable {
-    /// Credenciales válidas y autorizadas.
+    /// Valid and authorized credentials.
     case authorized
-    /// Credenciales revocadas por el usuario.
+    /// Credentials revoked by the user.
     case revoked
-    /// No se encontraron credenciales.
+    /// No credentials found.
     case notFound
-    /// Estado de credencial transferido desde otro dispositivo.
+    /// Credential state transferred from another device.
     case transferred
 }

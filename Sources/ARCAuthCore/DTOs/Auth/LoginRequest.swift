@@ -1,11 +1,11 @@
 import Foundation
 
-/// Request para autenticación con email/password.
+/// Request for email/password authentication.
 public struct LoginRequest: Sendable, Codable {
-    /// Email del usuario.
+    /// User email.
     public let email: String
 
-    /// Password del usuario.
+    /// User password.
     public let password: String
 
     public init(email: String, password: String) {

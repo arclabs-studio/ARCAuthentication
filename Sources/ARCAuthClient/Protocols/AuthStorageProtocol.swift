@@ -1,20 +1,20 @@
 import ARCAuthCore
 import Foundation
 
-/// Protocolo para almacenamiento seguro de credenciales.
+/// Protocol for secure credential storage.
 ///
-/// La implementación por defecto usa Keychain vía ARCStorage.
+/// The default implementation uses Keychain via ARCStorage.
 @MainActor
 public protocol AuthStorageProtocol: Sendable {
-    /// Guarda las credenciales de autenticación.
+    /// Saves the authentication credentials.
     func saveCredential(_ credential: AuthCredential) async throws
 
-    /// Obtiene las credenciales almacenadas.
+    /// Gets the stored credentials.
     func getCredential() async throws -> AuthCredential?
 
-    /// Elimina las credenciales almacenadas.
+    /// Deletes the stored credentials.
     func deleteCredential() async throws
 
-    /// Indica si hay credenciales almacenadas.
+    /// Whether there are stored credentials.
     func hasStoredCredential() async -> Bool
 }

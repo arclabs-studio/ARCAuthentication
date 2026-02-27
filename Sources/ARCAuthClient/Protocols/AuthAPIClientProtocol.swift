@@ -1,20 +1,20 @@
 import ARCAuthCore
 import Foundation
 
-/// Protocolo para comunicación con el backend de autenticación.
+/// Protocol for communication with the authentication backend.
 @MainActor
 public protocol AuthAPIClientProtocol: Sendable {
-    /// Envía las credenciales de Apple al servidor para verificación.
-    /// - Parameter payload: Payload de autenticación de Apple.
-    /// - Returns: Respuesta con tokens del servidor.
+    /// Sends Apple credentials to the server for verification.
+    /// - Parameter payload: Apple authentication payload.
+    /// - Returns: Response with server tokens.
     func verifyAppleCredential(_ payload: AppleAuthPayload) async throws -> TokenResponse
 
-    /// Renueva el access token usando el refresh token.
-    /// - Parameter request: Request con el refresh token.
-    /// - Returns: Nueva respuesta con tokens.
+    /// Renews the access token using the refresh token.
+    /// - Parameter request: Request with the refresh token.
+    /// - Returns: New token response.
     func refreshToken(_ request: RefreshTokenRequest) async throws -> TokenResponse
 
-    /// Cierra la sesión en el servidor.
-    /// - Parameter accessToken: Token de acceso actual.
+    /// Signs out the session on the server.
+    /// - Parameter accessToken: Current access token.
     func signOut(accessToken: String) async throws
 }

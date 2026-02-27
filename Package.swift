@@ -34,10 +34,7 @@ let package = Package(
 
         .target(
             name: "ARCAuthCore",
-            dependencies: [],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            dependencies: []
         ),
         .testTarget(
             name: "ARCAuthCoreTests",
@@ -52,9 +49,6 @@ let package = Package(
                 "ARCAuthCore",
                 .product(name: "ARCLogger", package: "ARCLogger"),
                 .product(name: "ARCStorage", package: "ARCStorage")
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
             ]
         ),
         .testTarget(

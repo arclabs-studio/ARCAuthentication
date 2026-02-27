@@ -4,10 +4,9 @@ A demonstration iOS app showcasing the ARCAuthentication package.
 
 ## Features
 
-- Sign in with Apple integration
-- Session persistence with Keychain
-- Observable authentication state
-- SwiftUI components
+- Sign in with Apple credential provider
+- SwiftUI button component
+- Credential display after sign-in
 
 ## Requirements
 
@@ -47,56 +46,38 @@ ARCAuthenticationDemo/
 
 The demo app shows how to:
 
-### 1. Configure AuthenticationManager
+### 1. Create a Credential Provider
 
 ```swift
-@StateObject private var authManager: AuthenticationManager = {
-    let manager = AuthenticationManager()
-    manager.register(provider: AppleAuthProvider())
-    return manager
-}()
+let provider = AppleCredentialProvider()
 ```
 
-### 2. Restore Session on Launch
+### 2. Request a Credential
 
 ```swift
-.task {
-    await authManager.restoreSession()
-}
+let credential = try await provider.requestCredential()
 ```
 
-### 3. Authenticate with Apple
+### 3. Use the Apple Sign-In Button
 
 ```swift
 AppleSignInButton {
-    try await authManager.authenticate(with: "apple")
+    Task {
+        let credential = try await provider.requestCredential()
+        // Handle credential...
+    }
 }
-```
-
-### 4. Check Authentication State
-
-```swift
-if authManager.state.isAuthenticated {
-    // Show authenticated content
-} else {
-    // Show login
-}
-```
-
-### 5. Sign Out
-
-```swift
-try await authManager.signOut()
 ```
 
 ## Architecture
 
-The demo follows MVVM architecture with:
+The demo uses ARCAuthentication v2 as a pure credential provider:
 
-- **AuthenticationManager**: Central coordinator for auth state
-- **AppleAuthProvider**: Sign in with Apple implementation
-- **KeychainAuthStorage**: Secure credential storage (via ARCStorage)
-- **AuthenticationState**: Observable state for SwiftUI
+- **AppleCredentialProvider**: Handles the Sign in with Apple flow
+- **AppleSignInButton**: SwiftUI wrapper for the system button
+- **AuthCredential**: Provider-agnostic credential result
+
+Backend integration (Firebase, Vapor, etc.) is the app's responsibility.
 
 ## License
 

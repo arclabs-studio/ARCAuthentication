@@ -5,26 +5,14 @@
 //  Created by ARC Labs Studio on 23/01/2026.
 //
 
-import ARCAuthClient
-import ARCAuthCore
+import ARCAuthentication
 import SwiftUI
 
 @main
 struct ARCAuthenticationDemoApp: App {
-    @State private var authManager: AuthenticationManager = {
-        let manager = AuthenticationManager()
-        manager.register(provider: AppleAuthProvider())
-        return manager
-    }()
-
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(authManager)
-                .task {
-                    authManager.observeCredentialRevocation()
-                    await authManager.restoreSession()
-                }
         }
     }
 }

@@ -1,25 +1,44 @@
 import Foundation
 import Testing
-
 @testable import ARCAuthClient
 @testable import ARCAuthCore
+
+extension Tag {
+    @Tag static var unit: Self
+}
 
 @Suite("AuthenticationManager Tests")
 @MainActor
 struct AuthenticationManagerTests {
-    @Test("Register provider")
-    func registerProvider() async {
-        let manager = AuthenticationManager()
-        let provider = MockAuthenticationProvider(providerID: "test")
+    // MARK: - Factory
 
-        manager.register(provider: provider)
-
-        #expect(manager.provider(for: "test") != nil)
+    private func makeSUT(
+        storage: MockAuthStorage = MockAuthStorage(),
+        configuration: AuthenticationConfiguration = .default
+    ) -> (manager: AuthenticationManager, storage: MockAuthStorage) {
+        let manager = AuthenticationManager(storage: storage, configuration: configuration)
+        return (manager, storage)
     }
 
-    @Test("Available providers only returns available ones")
-    func availableProviders() async {
-        let manager = AuthenticationManager()
+    // MARK: - Provider Registration
+
+    @Test("Should register provider when valid provider is given", .tags(.unit))
+    func registerProvider() {
+        // Given
+        let (sut, _) = makeSUT()
+        let provider = MockAuthenticationProvider(providerID: "test")
+
+        // When
+        sut.register(provider: provider)
+
+        // Then
+        #expect(sut.provider(for: "test") != nil)
+    }
+
+    @Test("Should return only available providers when filtering", .tags(.unit))
+    func availableProviders() {
+        // Given
+        let (sut, _) = makeSUT()
 
         let available = MockAuthenticationProvider(providerID: "available")
         available.isAvailable = true
@@ -27,18 +46,24 @@ struct AuthenticationManagerTests {
         let unavailable = MockAuthenticationProvider(providerID: "unavailable")
         unavailable.isAvailable = false
 
-        manager.register(provider: available)
-        manager.register(provider: unavailable)
+        sut.register(provider: available)
+        sut.register(provider: unavailable)
 
-        let providers = manager.availableProviders
+        // When
+        let providers = sut.availableProviders
+
+        // Then
         #expect(providers.count == 1)
         #expect(providers.first?.providerID == "available")
     }
 
-    @Test("Authenticate success")
+    // MARK: - Authentication
+
+    @Test("Should authenticate and store credential when provider succeeds", .tags(.unit))
     func authenticateSuccess() async throws {
+        // Given
         let storage = MockAuthStorage()
-        let manager = AuthenticationManager(storage: storage)
+        let (sut, _) = makeSUT(storage: storage)
 
         let credential = AuthCredential(
             userID: "user123",
@@ -48,101 +73,192 @@ struct AuthenticationManagerTests {
 
         let provider = MockAuthenticationProvider(providerID: "apple")
         provider.authenticateResult = .success(credential)
-        manager.register(provider: provider)
+        sut.register(provider: provider)
 
-        try await manager.authenticate(with: "apple")
+        // When
+        try await sut.authenticate(with: "apple")
 
-        #expect(manager.state.isAuthenticated == true)
-        #expect(manager.state.currentCredential?.userID == "user123")
+        // Then
+        #expect(sut.state.isAuthenticated == true)
+        #expect(sut.state.currentCredential?.userID == "user123")
         #expect(storage.saveCallCount == 1)
     }
 
-    @Test("Authenticate failure - provider not registered")
+    @Test("Should throw error when provider is not registered", .tags(.unit))
     func authenticateFailureNotRegistered() async {
-        let manager = AuthenticationManager()
+        // Given
+        let (sut, _) = makeSUT()
 
+        // When / Then
         await #expect(throws: AuthenticationError.self) {
-            try await manager.authenticate(with: "unknown")
+            try await sut.authenticate(with: "unknown")
         }
     }
 
-    @Test("Authenticate failure - provider error")
+    @Test("Should set error state when provider fails", .tags(.unit))
     func authenticateFailureProviderError() async {
-        let manager = AuthenticationManager()
+        // Given
+        let (sut, _) = makeSUT()
 
         let provider = MockAuthenticationProvider(providerID: "apple")
         provider.authenticateResult = .failure(AuthenticationError.userCancelled)
-        manager.register(provider: provider)
+        sut.register(provider: provider)
 
+        // When
         await #expect(throws: AuthenticationError.self) {
-            try await manager.authenticate(with: "apple")
+            try await sut.authenticate(with: "apple")
         }
 
-        #expect(manager.state.isAuthenticated == false)
-        #expect(manager.state.lastError == .userCancelled)
+        // Then
+        #expect(sut.state.isAuthenticated == false)
+        #expect(sut.state.lastError == .userCancelled)
     }
 
-    @Test("Sign out success")
+    // MARK: - Sign Out
+
+    @Test("Should clear state and storage when signing out", .tags(.unit))
     func signOutSuccess() async throws {
+        // Given
         let storage = MockAuthStorage()
-        let manager = AuthenticationManager(storage: storage)
+        let (sut, _) = makeSUT(storage: storage)
 
         let credential = AuthCredential(userID: "user123", provider: .apple)
         let provider = MockAuthenticationProvider(providerID: "apple")
         provider.authenticateResult = .success(credential)
-        manager.register(provider: provider)
+        sut.register(provider: provider)
 
-        try await manager.authenticate(with: "apple")
-        #expect(manager.state.isAuthenticated == true)
+        try await sut.authenticate(with: "apple")
+        #expect(sut.state.isAuthenticated == true)
 
-        try await manager.signOut()
+        // When
+        try await sut.signOut()
 
-        #expect(manager.state.isAuthenticated == false)
-        #expect(manager.state.currentCredential == nil)
+        // Then
+        #expect(sut.state.isAuthenticated == false)
+        #expect(sut.state.currentCredential == nil)
         #expect(storage.deleteCallCount == 1)
     }
 
-    @Test("Restore session with stored credential")
+    @Test("Should clear state when signing out without registered provider", .tags(.unit))
+    func signOutWithoutProvider() async throws {
+        // Given
+        let storage = MockAuthStorage()
+        let (sut, _) = makeSUT(storage: storage)
+
+        // When
+        try await sut.signOut()
+
+        // Then
+        #expect(sut.state.isAuthenticated == false)
+        #expect(storage.deleteCallCount == 1)
+    }
+
+    // MARK: - Session Restore
+
+    @Test("Should restore session when stored credential exists", .tags(.unit))
     func restoreSessionWithCredential() async {
+        // Given
         let storage = MockAuthStorage()
         storage.storedCredential = AuthCredential(
             userID: "user123",
             provider: .google
         )
 
-        let manager = AuthenticationManager(
+        let (sut, _) = makeSUT(
             storage: storage,
             configuration: AuthenticationConfiguration(verifyAppleCredentialsOnRestore: false)
         )
 
-        await manager.restoreSession()
+        // When
+        await sut.restoreSession()
 
-        #expect(manager.state.isAuthenticated == true)
-        #expect(manager.state.currentCredential?.userID == "user123")
+        // Then
+        #expect(sut.state.isAuthenticated == true)
+        #expect(sut.state.currentCredential?.userID == "user123")
     }
 
-    @Test("Restore session without credential")
+    @Test("Should set unauthenticated when no stored credential exists", .tags(.unit))
     func restoreSessionWithoutCredential() async {
+        // Given
         let storage = MockAuthStorage()
-        let manager = AuthenticationManager(storage: storage)
+        let (sut, _) = makeSUT(storage: storage)
 
-        await manager.restoreSession()
+        // When
+        await sut.restoreSession()
 
-        #expect(manager.state.isAuthenticated == false)
+        // Then
+        #expect(sut.state.isAuthenticated == false)
     }
 
-    @Test("State loading during authenticate")
+    // MARK: - State Management
+
+    @Test("Should not be loading after authentication completes", .tags(.unit))
     func stateLoadingDuringAuthenticate() async throws {
+        // Given
         let storage = MockAuthStorage()
-        let manager = AuthenticationManager(storage: storage)
+        let (sut, _) = makeSUT(storage: storage)
 
         let provider = MockAuthenticationProvider(providerID: "apple")
-        manager.register(provider: provider)
+        sut.register(provider: provider)
 
-        #expect(manager.state.isLoading == false)
+        #expect(sut.state.isLoading == false)
 
-        try await manager.authenticate(with: "apple")
+        // When
+        try await sut.authenticate(with: "apple")
 
-        #expect(manager.state.isLoading == false)
+        // Then
+        #expect(sut.state.isLoading == false)
+    }
+
+    @Test("Should clear error when starting new authentication", .tags(.unit))
+    func errorClearedOnNewAuthentication() async throws {
+        // Given
+        let storage = MockAuthStorage()
+        let (sut, _) = makeSUT(storage: storage)
+
+        let provider = MockAuthenticationProvider(providerID: "apple")
+        provider.authenticateResult = .failure(AuthenticationError.userCancelled)
+        sut.register(provider: provider)
+
+        await #expect(throws: AuthenticationError.self) {
+            try await sut.authenticate(with: "apple")
+        }
+        #expect(sut.state.lastError != nil)
+
+        // When - authenticate again (success this time)
+        provider.authenticateResult = .success(AuthCredential(userID: "user123", provider: .apple))
+        try await sut.authenticate(with: "apple")
+
+        // Then
+        #expect(sut.state.lastError == nil)
+    }
+
+    @Test("Should return notFound when checking credential state without session", .tags(.unit))
+    func checkCredentialStateWithoutSession() async {
+        // Given
+        let (sut, _) = makeSUT()
+
+        // When
+        let credentialState = await sut.checkCredentialState()
+
+        // Then
+        #expect(credentialState == .notFound)
+    }
+
+    @Test("Should propagate storage failure on authenticate", .tags(.unit))
+    func storageFailurePropagation() async {
+        // Given
+        let storage = MockAuthStorage()
+        storage.saveError = AuthenticationError.storageSaveFailed(underlying: nil)
+        let (sut, _) = makeSUT(storage: storage)
+
+        let provider = MockAuthenticationProvider(providerID: "apple")
+        sut.register(provider: provider)
+
+        // When / Then
+        await #expect(throws: AuthenticationError.self) {
+            try await sut.authenticate(with: "apple")
+        }
+        #expect(sut.state.isAuthenticated == false)
     }
 }

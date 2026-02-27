@@ -1,12 +1,12 @@
 import Foundation
 import Testing
-
 @testable import ARCAuthCore
 
 @Suite("AuthenticationError Tests")
 struct AuthenticationErrorTests {
-    @Test("Error descriptions are not empty")
+    @Test("Should have non-empty descriptions for all error types", .tags(.unit))
     func errorDescriptionsNotEmpty() {
+        // Given
         let errors: [AuthenticationError] = [
             .providerNotRegistered("test"),
             .appleSignInFailed(underlying: nil),
@@ -25,38 +25,47 @@ struct AuthenticationErrorTests {
             .unknown(underlying: nil)
         ]
 
+        // When / Then
         for error in errors {
             #expect(error.errorDescription != nil)
             #expect(error.errorDescription?.isEmpty == false)
         }
     }
 
-    @Test("providerNotRegistered includes provider ID")
+    @Test("Should include provider ID in providerNotRegistered description", .tags(.unit))
     func providerNotRegisteredIncludesID() {
-        let error = AuthenticationError.providerNotRegistered("my_provider")
-        #expect(error.errorDescription?.contains("my_provider") == true)
+        // Given
+        let sut = AuthenticationError.providerNotRegistered("my_provider")
+
+        // When / Then
+        #expect(sut.errorDescription?.contains("my_provider") == true)
     }
 
-    @Test("serverError includes status code and message")
+    @Test("Should include status code and message in serverError description", .tags(.unit))
     func serverErrorIncludesDetails() {
-        let error = AuthenticationError.serverError(
+        // Given
+        let sut = AuthenticationError.serverError(
             statusCode: 401,
             message: "Unauthorized"
         )
-        #expect(error.errorDescription?.contains("401") == true)
-        #expect(error.errorDescription?.contains("Unauthorized") == true)
+
+        // When / Then
+        #expect(sut.errorDescription?.contains("401") == true)
+        #expect(sut.errorDescription?.contains("Unauthorized") == true)
     }
 
-    @Test("Recovery suggestions for specific errors")
+    @Test("Should provide recovery suggestions for specific errors", .tags(.unit))
     func recoverySuggestions() {
+        // Given / When / Then
         #expect(AuthenticationError.userCancelled.recoverySuggestion != nil)
         #expect(AuthenticationError.tokenExpired.recoverySuggestion != nil)
         #expect(AuthenticationError.networkError(underlying: nil).recoverySuggestion != nil)
         #expect(AuthenticationError.credentialRevoked.recoverySuggestion != nil)
     }
 
-    @Test("Equatable conformance")
+    @Test("Should be equal when same type and associated values match", .tags(.unit))
     func equatableConformance() {
+        // Given / When / Then
         #expect(AuthenticationError.userCancelled == AuthenticationError.userCancelled)
         #expect(AuthenticationError.tokenExpired == AuthenticationError.tokenExpired)
 
@@ -79,8 +88,9 @@ struct AuthenticationErrorTests {
         )
     }
 
-    @Test("Different error types are not equal")
+    @Test("Should not be equal when different error types", .tags(.unit))
     func differentErrorTypesNotEqual() {
+        // Given / When / Then
         #expect(AuthenticationError.userCancelled != AuthenticationError.tokenExpired)
         #expect(AuthenticationError.invalidCredentials != AuthenticationError.invalidIdentityToken)
     }

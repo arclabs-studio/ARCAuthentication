@@ -98,7 +98,11 @@ struct AuthenticatedView: View {
 
             Button(role: .destructive) {
                 Task {
-                    try await authManager.signOut()
+                    do {
+                        try await authManager.signOut()
+                    } catch {
+                        print("Sign out failed: \(error.localizedDescription)")
+                    }
                 }
             } label: {
                 Text("Sign Out")

@@ -22,6 +22,7 @@ struct ARCAuthenticationDemoApp: App {
             ContentView()
                 .environment(authManager)
                 .task {
+                    authManager.observeCredentialRevocation()
                     await authManager.restoreSession()
                 }
         }

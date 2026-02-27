@@ -237,15 +237,20 @@ public final class AuthenticationManager {
             object: nil,
             queue: nil
         ) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                logger.warning("Apple credential revocation notification received")
-                try? await storage.deleteCredential()
-                UserDefaults.standard.removeObject(forKey: AuthConstants.Defaults.displayNameKey)
-                state.setUnauthenticated()
+            Task { @MainActor in
+                await self?.handleCredentialRevocation()
             }
         }
         #endif
+    }
+
+    /// Handles Apple credential revocation by clearing stored credentials and resetting state.
+    @MainActor
+    private func handleCredentialRevocation() async {
+        logger.warning("Apple credential revocation notification received")
+        try? await storage.deleteCredential()
+        UserDefaults.standard.removeObject(forKey: AuthConstants.Defaults.displayNameKey)
+        state.setUnauthenticated()
     }
 
     /// Stops observing Apple ID credential revocation notifications.

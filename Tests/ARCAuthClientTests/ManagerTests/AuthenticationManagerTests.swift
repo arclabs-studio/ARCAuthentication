@@ -11,7 +11,10 @@ struct AuthenticationManagerTests {
     private func makeSUT(
         storage: MockAuthStorage = MockAuthStorage(),
         configuration: AuthenticationConfiguration = .default
-    ) -> (manager: AuthenticationManager, storage: MockAuthStorage) {
+    ) -> (
+        manager: AuthenticationManager,
+        storage: MockAuthStorage
+    ) {
         let manager = AuthenticationManager(storage: storage, configuration: configuration)
         return (manager, storage)
     }

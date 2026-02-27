@@ -69,23 +69,15 @@ struct AuthenticationErrorTests {
         #expect(AuthenticationError.userCancelled == AuthenticationError.userCancelled)
         #expect(AuthenticationError.tokenExpired == AuthenticationError.tokenExpired)
 
-        #expect(
-            AuthenticationError.providerNotRegistered("a") ==
-                AuthenticationError.providerNotRegistered("a")
-        )
-        #expect(
-            AuthenticationError.providerNotRegistered("a") !=
-                AuthenticationError.providerNotRegistered("b")
-        )
+        #expect(AuthenticationError.providerNotRegistered("a") ==
+            AuthenticationError.providerNotRegistered("a"))
+        #expect(AuthenticationError.providerNotRegistered("a") !=
+            AuthenticationError.providerNotRegistered("b"))
 
-        #expect(
-            AuthenticationError.serverError(statusCode: 500, message: "Error") ==
-                AuthenticationError.serverError(statusCode: 500, message: "Error")
-        )
-        #expect(
-            AuthenticationError.serverError(statusCode: 500, message: nil) !=
-                AuthenticationError.serverError(statusCode: 400, message: nil)
-        )
+        #expect(AuthenticationError.serverError(statusCode: 500, message: "Error") ==
+            AuthenticationError.serverError(statusCode: 500, message: "Error"))
+        #expect(AuthenticationError.serverError(statusCode: 500, message: nil) !=
+            AuthenticationError.serverError(statusCode: 400, message: nil))
     }
 
     @Test("Should not be equal when different error types", .tags(.unit))

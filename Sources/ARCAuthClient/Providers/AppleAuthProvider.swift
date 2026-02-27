@@ -189,9 +189,7 @@ extension AppleAuthProvider: ASAuthorizationControllerDelegate {
 // MARK: - ASAuthorizationControllerPresentationContextProviding
 
 extension AppleAuthProvider: ASAuthorizationControllerPresentationContextProviding {
-    public nonisolated func presentationAnchor(
-        for _: ASAuthorizationController
-    ) -> ASPresentationAnchor {
+    public nonisolated func presentationAnchor(for _: ASAuthorizationController) -> ASPresentationAnchor {
         MainActor.assumeIsolated {
             let scenes = UIApplication.shared.connectedScenes
                 .compactMap { $0 as? UIWindowScene }

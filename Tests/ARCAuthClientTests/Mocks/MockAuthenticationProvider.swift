@@ -8,9 +8,10 @@ final class MockAuthenticationProvider: AuthenticationProvider {
     nonisolated let displayName: String
     nonisolated(unsafe) var isAvailable = true
 
-    var authenticateResult: Result<AuthCredential, Error> = .success(
-        AuthCredential(userID: "mock_user", provider: .apple)
-    )
+    var authenticateResult: Result<AuthCredential, Error> = .success(AuthCredential(
+        userID: "mock_user",
+        provider: .apple
+    ))
     var authenticateCallCount = 0
 
     var signOutError: Error?

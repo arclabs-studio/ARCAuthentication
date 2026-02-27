@@ -45,12 +45,10 @@ extension View {
         manager: AuthenticationManager,
         @ViewBuilder unauthContent: @escaping () -> some View
     ) -> some View {
-        modifier(
-            AuthenticationViewModifier(
-                manager: manager,
-                unauthContent: unauthContent
-            )
-        )
+        modifier(AuthenticationViewModifier(
+            manager: manager,
+            unauthContent: unauthContent
+        ))
     }
 }
 #endif

@@ -232,15 +232,16 @@ public final class AuthenticationManager {
         stopObservingCredentialRevocation()
 
         #if canImport(AuthenticationServices)
-        credentialRevocationObserver = NotificationCenter.default.addObserver(
-            forName: ASAuthorizationAppleIDProvider.credentialRevokedNotification,
-            object: nil,
-            queue: nil
-        ) { [weak self] _ in
-            Task { @MainActor in
-                await self?.handleCredentialRevocation()
+        credentialRevocationObserver = NotificationCenter.default
+            .addObserver(
+                forName: ASAuthorizationAppleIDProvider.credentialRevokedNotification,
+                object: nil,
+                queue: nil
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    await self?.handleCredentialRevocation()
+                }
             }
-        }
         #endif
     }
 

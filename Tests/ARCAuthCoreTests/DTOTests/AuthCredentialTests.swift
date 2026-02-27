@@ -2,10 +2,6 @@ import Foundation
 import Testing
 @testable import ARCAuthCore
 
-extension Tag {
-    @Tag static var unit: Self
-}
-
 @Suite("AuthCredential Tests")
 struct AuthCredentialTests {
     // MARK: - Factory

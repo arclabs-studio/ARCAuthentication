@@ -1,5 +1,8 @@
 import ARCAuthCore
 import ARCLogger
+#if canImport(AuthenticationServices)
+import AuthenticationServices
+#endif
 import Foundation
 
 /// Central authentication manager.

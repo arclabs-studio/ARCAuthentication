@@ -1,24 +1,24 @@
 #if canImport(AuthenticationServices) && canImport(UIKit)
 import ARCAuthCore
 import AuthenticationServices
-import CommonCrypto
+import CryptoKit
 import UIKit
 
-/// Provider de autenticación para Sign in with Apple.
+/// Authentication provider for Sign in with Apple.
 ///
-/// Implementa el flujo completo de autenticación con Apple ID usando
-/// el framework `AuthenticationServices`.
+/// Implements the complete authentication flow with Apple ID using
+/// the `AuthenticationServices` framework.
 ///
-/// ## Uso
+/// ## Usage
 /// ```swift
 /// let provider = AppleAuthProvider()
 /// let credential = try await provider.authenticate()
 /// ```
 ///
-/// ## Notas Importantes
-/// - `email` y `fullName` solo se proporcionan en el **primer** Sign in
-/// - El `identityToken` es un JWT que debe verificarse en el servidor
-/// - El `authorizationCode` expira en 5 minutos
+/// ## Important Notes
+/// - `email` and `fullName` are only provided on the **first** Sign in
+/// - The `identityToken` is a JWT that must be verified on the server
+/// - The `authorizationCode` expires in 5 minutes
 @MainActor
 public final class AppleAuthProvider: NSObject, AuthenticationProvider {
     // MARK: - Properties
@@ -49,19 +49,19 @@ public final class AppleAuthProvider: NSObject, AuthenticationProvider {
     }
 
     public func signOut() async throws {
-        // Apple no requiere sign out explícito
-        // El sign out se maneja eliminando las credenciales almacenadas
+        // Apple does not require explicit sign out
+        // Sign out is handled by deleting stored credentials
     }
 
     public func checkCredentialState() async -> CredentialState {
-        // Necesitamos un userID guardado para verificar
-        // Esto normalmente se obtendría del storage
+        // We need a saved userID to verify
+        // This would normally be obtained from storage
         .notFound
     }
 
-    /// Verifica el estado de credenciales para un userID específico.
-    /// - Parameter userID: El identificador de usuario de Apple.
-    /// - Returns: Estado actual de las credenciales.
+    /// Checks credential state for a specific userID.
+    /// - Parameter userID: The Apple user identifier.
+    /// - Returns: Current credential state.
     public func checkCredentialState(for userID: String) async -> CredentialState {
         await withCheckedContinuation { continuation in
             ASAuthorizationAppleIDProvider().getCredentialState(forUserID: userID) { state, _ in
@@ -89,10 +89,16 @@ public final class AppleAuthProvider: NSObject, AuthenticationProvider {
         let request = provider.createRequest()
         request.requestedScopes = [.fullName, .email]
 
-        // Generar nonce para seguridad adicional (recomendado para backend)
-        let nonce = Self.generateNonce()
-        currentNonce = nonce
-        request.nonce = nonce.sha256Hash
+        // Generate nonce for additional security (recommended for backend)
+        do {
+            let nonce = try Self.generateNonce()
+            currentNonce = nonce
+            request.nonce = Self.sha256Hash(of: nonce)
+        } catch {
+            authContinuation?.resume(throwing: AuthenticationError.unknown(underlying: error))
+            authContinuation = nil
+            return
+        }
 
         let controller = ASAuthorizationController(authorizationRequests: [request])
         controller.delegate = self
@@ -148,17 +154,31 @@ public final class AppleAuthProvider: NSObject, AuthenticationProvider {
 
     // MARK: - Nonce Generation
 
-    private static func generateNonce(length: Int = 32) -> String {
+    private static func generateNonce(length: Int = 32) throws -> String {
         precondition(length > 0)
         var randomBytes = [UInt8](repeating: 0, count: length)
         let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
 
-        if errorCode != errSecSuccess {
-            fatalError("Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)")
+        guard errorCode == errSecSuccess else {
+            throw AuthenticationError.unknown(
+                underlying: NSError(
+                    domain: NSOSStatusErrorDomain,
+                    code: Int(errorCode),
+                    userInfo: [NSLocalizedDescriptionKey: "SecRandomCopyBytes failed with OSStatus \(errorCode)"]
+                )
+            )
         }
 
         let charset = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
         return String(randomBytes.map { charset[Int($0) % charset.count] })
+    }
+
+    // MARK: - SHA256
+
+    private static func sha256Hash(of input: String) -> String {
+        let data = Data(input.utf8)
+        let hash = SHA256.hash(data: data)
+        return hash.compactMap { String(format: "%02x", $0) }.joined()
     }
 }
 
@@ -199,24 +219,9 @@ extension AppleAuthProvider: ASAuthorizationControllerPresentationContextProvidi
             .first(where: { $0.activationState == .foregroundActive }),
             let window = windowScene.windows.first(where: { $0.isKeyWindow })
         else {
-            fatalError("No active window found for presenting Sign in with Apple")
+            return UIWindow()
         }
         return window
-    }
-}
-
-// MARK: - String Extension for SHA256
-
-extension String {
-    fileprivate var sha256Hash: String {
-        guard let data = data(using: .utf8) else { return self }
-
-        var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
-        data.withUnsafeBytes { buffer in
-            _ = CC_SHA256(buffer.baseAddress, CC_LONG(buffer.count), &hash)
-        }
-
-        return hash.map { String(format: "%02x", $0) }.joined()
     }
 }
 #endif

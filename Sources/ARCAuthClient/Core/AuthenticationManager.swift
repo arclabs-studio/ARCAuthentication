@@ -214,4 +214,31 @@ public final class AuthenticationManager {
     public var savedDisplayName: String? {
         UserDefaults.standard.string(forKey: "auth.displayName")
     }
+
+    // MARK: - Credential Revocation
+
+    /// Starts observing Apple ID credential revocation notifications.
+    ///
+    /// When Apple revokes a user's credentials (e.g., the user stops using Apple ID
+    /// with your app via Settings), this observer deletes stored credentials and
+    /// sets the state to unauthenticated (per Apple TN3194).
+    ///
+    /// Call this method once at app launch.
+    public func observeCredentialRevocation() {
+        #if canImport(AuthenticationServices)
+        NotificationCenter.default.addObserver(
+            forName: ASAuthorizationAppleIDProvider.credentialRevokedNotification,
+            object: nil,
+            queue: nil
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                logger.warning("Apple credential revocation notification received")
+                try? await storage.deleteCredential()
+                UserDefaults.standard.removeObject(forKey: "auth.displayName")
+                state.setUnauthenticated()
+            }
+        }
+        #endif
+    }
 }

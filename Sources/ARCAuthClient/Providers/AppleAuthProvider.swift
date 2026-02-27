@@ -1,7 +1,6 @@
 #if canImport(AuthenticationServices) && canImport(UIKit)
 import ARCAuthCore
 import AuthenticationServices
-import CryptoKit
 import UIKit
 
 /// Authentication provider for Sign in with Apple.
@@ -99,9 +98,9 @@ public final class AppleAuthProvider: NSObject, AuthenticationProvider {
 
         // Generate nonce for additional security (recommended for backend)
         do {
-            let nonce = try Self.generateNonce()
+            let nonce = try CryptoUtils.generateNonce()
             currentNonce = nonce
-            request.nonce = Self.sha256Hash(of: nonce)
+            request.nonce = CryptoUtils.sha256Hash(of: nonce)
         } catch {
             authContinuation?.resume(throwing: AuthenticationError.unknown(underlying: error))
             authContinuation = nil
@@ -158,35 +157,6 @@ public final class AppleAuthProvider: NSObject, AuthenticationProvider {
 
         authContinuation?.resume(throwing: authError)
         authContinuation = nil
-    }
-
-    // MARK: - Nonce Generation
-
-    private static func generateNonce(length: Int = 32) throws -> String {
-        precondition(length > 0)
-        var randomBytes = [UInt8](repeating: 0, count: length)
-        let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
-
-        guard errorCode == errSecSuccess else {
-            throw AuthenticationError.unknown(
-                underlying: NSError(
-                    domain: NSOSStatusErrorDomain,
-                    code: Int(errorCode),
-                    userInfo: [NSLocalizedDescriptionKey: "SecRandomCopyBytes failed with OSStatus \(errorCode)"]
-                )
-            )
-        }
-
-        let charset = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
-        return String(randomBytes.map { charset[Int($0) % charset.count] })
-    }
-
-    // MARK: - SHA256
-
-    private static func sha256Hash(of input: String) -> String {
-        let data = Data(input.utf8)
-        let hash = SHA256.hash(data: data)
-        return hash.compactMap { String(format: "%02x", $0) }.joined()
     }
 }
 

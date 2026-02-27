@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Google Sign-In to the demo app alongside Sign in with Apple
+- Demo app README with full Google Sign-In configuration guide
+- Comprehensive documentation for Google Sign-In setup in DocC Getting Started guide
+- URL scheme and `onOpenURL` handler in demo app for Google OAuth callback
+
 ## [2.0.0] - 2026-02-27
 
 ### Breaking Changes

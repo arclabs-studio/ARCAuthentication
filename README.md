@@ -18,10 +18,12 @@ ARCAuthentication is a pure credential-provider library. It handles the platform
 - Sign in with Apple via `AppleCredentialProvider`
 - Google Sign-In via `GoogleCredentialProvider` (separate `ARCAuthGoogle` target)
 - Protocol-oriented: implement `CredentialProviding` for custom providers
+- Shared sign-in logic across providers via protocol abstraction
 - Zero ARC package dependencies (core target)
 - `MockCredentialProvider` included for testing
 - `AppleSignInButton` SwiftUI component
 - Swift 6 strict concurrency
+- Demo app with both Apple and Google authentication
 
 ---
 
@@ -105,12 +107,46 @@ struct LoginView: View {
 
 ### Google Sign-In
 
+Google Sign-In requires a client ID from the [Google Cloud Console](https://console.cloud.google.com/) and the `ARCAuthGoogle` target.
+
 ```swift
 import ARCAuthGoogle
 
 let config = GoogleConfiguration(clientID: "your-client-id.apps.googleusercontent.com")
 let provider = GoogleCredentialProvider(configuration: config)
 let credential = try await provider.requestCredential()
+
+switch credential {
+case .google(let google):
+    let idToken = google.idToken
+    let accessToken = google.accessToken
+    // Verify with your backend...
+case .apple:
+    break
+}
+```
+
+Your app must also handle the OAuth callback URL:
+
+```swift
+// In your App entry point
+.onOpenURL { url in
+    GIDSignIn.sharedInstance.handle(url)
+}
+```
+
+And register the reversed client ID as a URL scheme in your `Info.plist`:
+
+```xml
+<key>CFBundleURLTypes</key>
+<array>
+    <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>com.googleusercontent.apps.YOUR_CLIENT_ID</string>
+        </array>
+    </dict>
+</array>
 ```
 
 ### Custom Provider
@@ -177,6 +213,17 @@ Sources/ARCAuthGoogle/
 └── Providers/
     └── GoogleCredentialProvider   # Google Sign-In
 ```
+
+---
+
+## Demo App
+
+A complete demo app is included at `Example/ARCAuthenticationDemo/` showing both providers in action:
+
+- **Sign in with Apple** — works on the iOS Simulator without configuration
+- **Google Sign-In** — requires a Google Cloud Console client ID (see the [demo README](Example/ARCAuthenticationDemo/README.md) for setup)
+
+The demo uses a shared `signIn(with: some CredentialProviding)` method to show how the protocol abstraction works in practice.
 
 ---
 

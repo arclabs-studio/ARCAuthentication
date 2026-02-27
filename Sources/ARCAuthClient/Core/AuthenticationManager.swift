@@ -1,17 +1,16 @@
 import ARCAuthCore
 import ARCLogger
-import Combine
 import Foundation
 
-/// Manager central de autenticación.
+/// Central authentication manager.
 ///
-/// Coordina providers, storage y estado de autenticación.
+/// Coordinates providers, storage, and authentication state.
 ///
-/// ## Configuración
+/// ## Configuration
 /// ```swift
 /// @main
 /// struct MyApp: App {
-///     @StateObject private var authManager: AuthenticationManager = {
+///     @State private var authManager: AuthenticationManager = {
 ///         let manager = AuthenticationManager()
 ///         manager.register(provider: AppleAuthProvider())
 ///         return manager
@@ -20,16 +19,16 @@ import Foundation
 ///     var body: some Scene {
 ///         WindowGroup {
 ///             ContentView()
-///                 .environmentObject(authManager)
+///                 .environment(authManager)
 ///         }
 ///     }
 /// }
 /// ```
 ///
-/// ## Uso
+/// ## Usage
 /// ```swift
-/// // En una View
-/// @EnvironmentObject var authManager: AuthenticationManager
+/// // In a View
+/// @Environment(AuthenticationManager.self) var authManager
 ///
 /// Button("Sign in with Apple") {
 ///     Task {
@@ -38,11 +37,12 @@ import Foundation
 /// }
 /// ```
 @MainActor
-public final class AuthenticationManager: ObservableObject {
-    // MARK: - Published Properties
+@Observable
+public final class AuthenticationManager {
+    // MARK: - Properties
 
-    /// Estado actual de autenticación.
-    @Published public private(set) var state = AuthenticationState()
+    /// Current authentication state.
+    public private(set) var state = AuthenticationState()
 
     // MARK: - Private Properties
 
@@ -53,17 +53,17 @@ public final class AuthenticationManager: ObservableObject {
 
     // MARK: - Initialization
 
-    /// Inicializa el manager con storage por defecto (Keychain).
+    /// Initializes the manager with default storage (Keychain).
     public init(configuration: AuthenticationConfiguration = .default) {
         storage = KeychainAuthStorage()
         self.configuration = configuration
         logger = ARCLogger(subsystem: "ARCAuthentication", category: "Manager")
     }
 
-    /// Inicializa el manager con storage custom.
+    /// Initializes the manager with custom storage.
     /// - Parameters:
-    ///   - storage: Implementación de `AuthStorageProtocol`.
-    ///   - configuration: Configuración del manager.
+    ///   - storage: Implementation of `AuthStorageProtocol`.
+    ///   - configuration: Manager configuration.
     public init(
         storage: any AuthStorageProtocol,
         configuration: AuthenticationConfiguration = .default
@@ -75,30 +75,30 @@ public final class AuthenticationManager: ObservableObject {
 
     // MARK: - Provider Management
 
-    /// Registra un provider de autenticación.
-    /// - Parameter provider: Provider a registrar.
+    /// Registers an authentication provider.
+    /// - Parameter provider: Provider to register.
     public func register(provider: any AuthenticationProvider) {
         providers[provider.providerID] = provider
         logger.info("Registered provider: \(provider.providerID)")
     }
 
-    /// Obtiene un provider registrado.
-    /// - Parameter id: Identificador del provider.
-    /// - Returns: Provider si existe.
+    /// Gets a registered provider.
+    /// - Parameter id: Provider identifier.
+    /// - Returns: Provider if it exists.
     public func provider(for id: String) -> (any AuthenticationProvider)? {
         providers[id]
     }
 
-    /// Lista de providers disponibles.
+    /// List of available providers.
     public var availableProviders: [any AuthenticationProvider] {
         providers.values.filter(\.isAvailable).map(\.self)
     }
 
     // MARK: - Authentication
 
-    /// Ejecuta autenticación con el provider especificado.
-    /// - Parameter providerID: ID del provider (ej: "apple").
-    /// - Throws: `AuthenticationError` si falla.
+    /// Executes authentication with the specified provider.
+    /// - Parameter providerID: Provider ID (e.g., "apple").
+    /// - Throws: `AuthenticationError` if it fails.
     public func authenticate(with providerID: String) async throws {
         guard let provider = providers[providerID] else {
             throw AuthenticationError.providerNotRegistered(providerID)
@@ -110,17 +110,17 @@ public final class AuthenticationManager: ObservableObject {
         do {
             let credential = try await provider.authenticate()
 
-            // Guardar en Keychain
+            // Save to Keychain
             try await storage.saveCredential(credential)
 
-            // Persistir displayName en UserDefaults si está configurado
+            // Persist displayName in UserDefaults if configured
             if configuration.persistDisplayNameInUserDefaults,
                let displayName = credential.displayName
             {
                 UserDefaults.standard.set(displayName, forKey: "auth.displayName")
             }
 
-            // Actualizar estado
+            // Update state
             state.setAuthenticated(with: credential)
 
             logger.info("Authentication successful for provider: \(providerID)")
@@ -132,7 +132,7 @@ public final class AuthenticationManager: ObservableObject {
         }
     }
 
-    /// Cierra la sesión actual.
+    /// Signs out the current session.
     public func signOut() async throws {
         guard let provider = state.currentProvider,
               let authProvider = providers[provider.rawValue]
@@ -148,7 +148,7 @@ public final class AuthenticationManager: ObservableObject {
             try await authProvider.signOut()
             try await storage.deleteCredential()
 
-            // Limpiar UserDefaults
+            // Clear UserDefaults
             UserDefaults.standard.removeObject(forKey: "auth.displayName")
 
             state.setUnauthenticated()
@@ -161,8 +161,8 @@ public final class AuthenticationManager: ObservableObject {
         }
     }
 
-    /// Restaura la sesión desde el almacenamiento.
-    /// Llamar al inicio de la app.
+    /// Restores the session from storage.
+    /// Call at app launch.
     public func restoreSession() async {
         logger.info("Attempting to restore session")
 
@@ -173,7 +173,7 @@ public final class AuthenticationManager: ObservableObject {
                 return
             }
 
-            // Verificar que las credenciales siguen siendo válidas (para Apple)
+            // Verify that credentials are still valid (for Apple)
             if configuration.verifyAppleCredentialsOnRestore,
                credential.provider == .apple
             {
@@ -199,7 +199,7 @@ public final class AuthenticationManager: ObservableObject {
         }
     }
 
-    /// Verifica el estado de las credenciales actuales.
+    /// Checks the state of the current credentials.
     public func checkCredentialState() async -> CredentialState {
         guard let credential = state.currentCredential,
               let provider = providers[credential.provider.rawValue]
@@ -210,7 +210,7 @@ public final class AuthenticationManager: ObservableObject {
         return await provider.checkCredentialState()
     }
 
-    /// Obtiene el displayName guardado (incluso si no hay sesión activa).
+    /// Gets the saved displayName (even if there is no active session).
     public var savedDisplayName: String? {
         UserDefaults.standard.string(forKey: "auth.displayName")
     }

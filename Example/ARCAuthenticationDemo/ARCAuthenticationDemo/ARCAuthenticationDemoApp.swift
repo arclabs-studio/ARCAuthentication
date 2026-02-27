@@ -11,7 +11,7 @@ import SwiftUI
 
 @main
 struct ARCAuthenticationDemoApp: App {
-    @StateObject private var authManager: AuthenticationManager = {
+    @State private var authManager: AuthenticationManager = {
         let manager = AuthenticationManager()
         manager.register(provider: AppleAuthProvider())
         return manager
@@ -20,7 +20,7 @@ struct ARCAuthenticationDemoApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(authManager)
+                .environment(authManager)
                 .task {
                     await authManager.restoreSession()
                 }

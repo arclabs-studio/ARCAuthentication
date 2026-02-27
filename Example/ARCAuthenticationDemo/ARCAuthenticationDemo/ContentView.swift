@@ -10,7 +10,7 @@ import ARCAuthCore
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var authManager: AuthenticationManager
+    @Environment(AuthenticationManager.self) var authManager
 
     var body: some View {
         NavigationStack {
@@ -29,7 +29,7 @@ struct ContentView: View {
 // MARK: - Login View
 
 struct LoginView: View {
-    @EnvironmentObject var authManager: AuthenticationManager
+    @Environment(AuthenticationManager.self) var authManager
 
     var body: some View {
         VStack(spacing: 32) {
@@ -65,7 +65,7 @@ struct LoginView: View {
 // MARK: - Authenticated View
 
 struct AuthenticatedView: View {
-    @EnvironmentObject var authManager: AuthenticationManager
+    @Environment(AuthenticationManager.self) var authManager
 
     var body: some View {
         VStack(spacing: 24) {
@@ -137,6 +137,6 @@ struct InfoRow: View {
 
 #Preview("Login") {
     let manager = AuthenticationManager()
-    return ContentView()
-        .environmentObject(manager)
+    ContentView()
+        .environment(manager)
 }

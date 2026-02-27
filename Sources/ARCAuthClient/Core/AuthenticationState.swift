@@ -1,14 +1,13 @@
 import ARCAuthCore
-import Combine
 import Foundation
 
-/// Estado observable de autenticación.
+/// Observable authentication state.
 ///
-/// Utiliza `@Published` para notificar cambios a SwiftUI automáticamente.
+/// Uses `@Observable` macro for automatic SwiftUI tracking.
 ///
-/// ## Uso en SwiftUI
+/// ## Usage in SwiftUI
 /// ```swift
-/// @StateObject private var authManager = AuthenticationManager()
+/// @State private var authManager = AuthenticationManager()
 ///
 /// var body: some View {
 ///     if authManager.state.isAuthenticated {
@@ -19,23 +18,24 @@ import Foundation
 /// }
 /// ```
 @MainActor
-public final class AuthenticationState: ObservableObject, @unchecked Sendable {
-    // MARK: - Published Properties
+@Observable
+public final class AuthenticationState {
+    // MARK: - Properties
 
-    /// Indica si hay una sesión activa.
-    @Published public private(set) var isAuthenticated = false
+    /// Whether there is an active session.
+    public private(set) var isAuthenticated = false
 
-    /// Credenciales del usuario actual (si está autenticado).
-    @Published public private(set) var currentCredential: AuthCredential?
+    /// Current user credentials (if authenticated).
+    public private(set) var currentCredential: AuthCredential?
 
-    /// Provider utilizado para la autenticación actual.
-    @Published public private(set) var currentProvider: AuthProvider?
+    /// Provider used for the current authentication.
+    public private(set) var currentProvider: AuthProvider?
 
-    /// Indica si hay una operación de autenticación en progreso.
-    @Published public private(set) var isLoading = false
+    /// Whether an authentication operation is in progress.
+    public private(set) var isLoading = false
 
-    /// Error de la última operación (si existe).
-    @Published public private(set) var lastError: AuthenticationError?
+    /// Error from the last operation (if any).
+    public private(set) var lastError: AuthenticationError?
 
     // MARK: - Initialization
 

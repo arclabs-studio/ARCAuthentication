@@ -31,8 +31,8 @@ public final class MockCredentialProvider: CredentialProviding, @unchecked Senda
     ///   - result: The result to return when credentials are requested.
     public init(
         providerType: AuthProviderType = .apple,
-        result: Result<AuthCredential, AuthenticationError> = .success(.apple(.mock))
-    ) {
+        result: Result<AuthCredential, AuthenticationError> = .success(.apple(.mock)))
+    {
         self.providerType = providerType
         self.result = result
     }

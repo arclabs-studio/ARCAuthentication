@@ -24,8 +24,7 @@ struct MockCredentialProviderTests {
         let expected = AuthCredential.google(.mock)
         let sut = MockCredentialProvider(
             providerType: .google,
-            result: .success(expected)
-        )
+            result: .success(expected))
 
         // When
         let result = try await sut.requestCredential()

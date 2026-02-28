@@ -27,8 +27,7 @@ struct GoogleCredentialProviderTests {
         // When
         let sut = GoogleConfiguration(
             clientID: "test-id",
-            additionalScopes: scopes
-        )
+            additionalScopes: scopes)
 
         // Then
         #expect(sut.additionalScopes == scopes)

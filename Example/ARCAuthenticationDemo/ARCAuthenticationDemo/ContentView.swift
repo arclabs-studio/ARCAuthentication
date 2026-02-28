@@ -18,9 +18,7 @@ struct ContentView: View {
     /// Replace with your Google Cloud Console client ID to test
     private let googleProvider = GoogleCredentialProvider(
         configuration: GoogleConfiguration(
-            clientID: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
-        )
-    )
+            clientID: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"))
 
     var body: some View {
         NavigationStack {
@@ -34,8 +32,7 @@ struct ContentView: View {
                     LoginView(
                         errorMessage: errorMessage,
                         onAppleSignIn: signInWithApple,
-                        onGoogleSignIn: signInWithGoogle
-                    )
+                        onGoogleSignIn: signInWithGoogle)
                 }
             }
             .navigationTitle("ARCAuthentication")
@@ -134,8 +131,7 @@ struct GoogleSignInButton: View {
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color(.separator), lineWidth: 1)
-            )
+                    .stroke(Color(.separator), lineWidth: 1))
         }
         .buttonStyle(.plain)
     }

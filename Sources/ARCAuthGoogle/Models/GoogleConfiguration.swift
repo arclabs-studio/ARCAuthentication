@@ -24,8 +24,8 @@ public struct GoogleConfiguration: Sendable {
     ///   - additionalScopes: Extra scopes to request (default: none).
     public init(
         clientID: String,
-        additionalScopes: [String] = []
-    ) {
+        additionalScopes: [String] = [])
+    {
         self.clientID = clientID
         self.additionalScopes = additionalScopes
     }

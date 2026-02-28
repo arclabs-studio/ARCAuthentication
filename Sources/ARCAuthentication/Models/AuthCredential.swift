@@ -63,8 +63,8 @@ public struct AppleCredential: Sendable, Equatable {
         nonce: String,
         fullName: PersonNameComponents? = nil,
         email: String? = nil,
-        userIdentifier: String
-    ) {
+        userIdentifier: String)
+    {
         self.identityToken = identityToken
         self.authorizationCode = authorizationCode
         self.nonce = nonce
@@ -85,8 +85,7 @@ public struct AppleCredential: Sendable, Equatable {
             return name
         }(),
         email: "john@example.com",
-        userIdentifier: "mock-apple-user-id"
-    )
+        userIdentifier: "mock-apple-user-id")
 }
 
 /// Credential obtained from Google Sign-In.
@@ -121,8 +120,8 @@ public struct GoogleCredential: Sendable, Equatable {
         accessToken: String,
         displayName: String? = nil,
         email: String? = nil,
-        photoURL: URL? = nil
-    ) {
+        photoURL: URL? = nil)
+    {
         self.idToken = idToken
         self.accessToken = accessToken
         self.displayName = displayName
@@ -136,6 +135,5 @@ public struct GoogleCredential: Sendable, Equatable {
         accessToken: "mock-google-access-token",
         displayName: "John Doe",
         email: "john@gmail.com",
-        photoURL: URL(string: "https://example.com/photo.jpg")
-    )
+        photoURL: URL(string: "https://example.com/photo.jpg"))
 }

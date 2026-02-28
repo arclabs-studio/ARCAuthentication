@@ -48,8 +48,7 @@ public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sen
                 result = try await GIDSignIn.sharedInstance.signIn(
                     withPresenting: presentingViewController,
                     hint: nil,
-                    additionalScopes: configuration.additionalScopes
-                )
+                    additionalScopes: configuration.additionalScopes)
             }
         } catch {
             throw Self.mapError(error)
@@ -66,8 +65,7 @@ public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sen
             accessToken: user.accessToken.tokenString,
             displayName: user.profile?.name,
             email: user.profile?.email,
-            photoURL: user.profile?.imageURL(withDimension: 200)
-        )
+            photoURL: user.profile?.imageURL(withDimension: 200))
 
         return .google(credential)
     }

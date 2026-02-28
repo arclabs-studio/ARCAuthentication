@@ -11,30 +11,25 @@ let package = Package(
     products: [
         .library(
             name: "ARCAuthentication",
-            targets: ["ARCAuthentication"]
-        ),
+            targets: ["ARCAuthentication"]),
         .library(
             name: "ARCAuthGoogle",
-            targets: ["ARCAuthGoogle"]
-        )
+            targets: ["ARCAuthGoogle"])
     ],
     dependencies: [
         .package(
             url: "https://github.com/google/GoogleSignIn-iOS.git",
-            from: "8.0.0"
-        )
+            from: "8.0.0")
     ],
     targets: [
         // MARK: - Core (Credential Providers)
 
         .target(
             name: "ARCAuthentication",
-            dependencies: []
-        ),
+            dependencies: []),
         .testTarget(
             name: "ARCAuthenticationTests",
-            dependencies: ["ARCAuthentication"]
-        ),
+            dependencies: ["ARCAuthentication"]),
 
         // MARK: - Google (Google Sign-In)
 
@@ -43,12 +38,9 @@ let package = Package(
             dependencies: [
                 "ARCAuthentication",
                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS")
-            ]
-        ),
+            ]),
         .testTarget(
             name: "ARCAuthGoogleTests",
-            dependencies: ["ARCAuthGoogle"]
-        )
+            dependencies: ["ARCAuthGoogle"])
     ],
-    swiftLanguageModes: [.v6]
-)
+    swiftLanguageModes: [.v6])

@@ -98,8 +98,8 @@ public final class AppleCredentialProvider: NSObject, CredentialProviding, @unch
 extension AppleCredentialProvider: ASAuthorizationControllerDelegate {
     public nonisolated func authorizationController(
         controller _: ASAuthorizationController,
-        didCompleteWithAuthorization authorization: ASAuthorization
-    ) {
+        didCompleteWithAuthorization authorization: ASAuthorization)
+    {
         Task { @MainActor in
             guard let appleCredential = authorization.credential as? ASAuthorizationAppleIDCredential else {
                 authContinuation?.resume(throwing: AuthenticationError.unexpectedCredentialType)
@@ -131,8 +131,7 @@ extension AppleCredentialProvider: ASAuthorizationControllerDelegate {
                 nonce: nonce,
                 fullName: appleCredential.fullName,
                 email: appleCredential.email,
-                userIdentifier: appleCredential.user
-            )
+                userIdentifier: appleCredential.user)
 
             authContinuation?.resume(returning: .apple(credential))
             authContinuation = nil
@@ -142,8 +141,8 @@ extension AppleCredentialProvider: ASAuthorizationControllerDelegate {
 
     public nonisolated func authorizationController(
         controller _: ASAuthorizationController,
-        didCompleteWithError error: Error
-    ) {
+        didCompleteWithError error: Error)
+    {
         Task { @MainActor in
             authContinuation?.resume(throwing: AppleAuthErrorMapper.mapError(error))
             authContinuation = nil

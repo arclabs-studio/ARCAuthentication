@@ -31,8 +31,8 @@ public struct AppleSignInButton: View {
     public init(
         type: SignInWithAppleButton.Label = .signIn,
         style: SignInWithAppleButton.Style = .black,
-        action: @escaping () -> Void
-    ) {
+        action: @escaping () -> Void)
+    {
         self.type = type
         self.style = style
         self.action = action
@@ -44,18 +44,17 @@ public struct AppleSignInButton: View {
         SignInWithAppleButton(
             type,
             onRequest: { _ in },
-            onCompletion: { _ in }
-        )
-        .signInWithAppleButtonStyle(style)
-        .frame(height: 50)
-        .allowsHitTesting(false)
-        .overlay {
-            Color.clear
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    action()
-                }
-        }
+            onCompletion: { _ in })
+            .signInWithAppleButtonStyle(style)
+            .frame(height: 50)
+            .allowsHitTesting(false)
+            .overlay {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        action()
+                    }
+            }
     }
 }
 

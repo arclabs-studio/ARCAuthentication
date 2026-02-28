@@ -21,8 +21,7 @@ struct AuthCredentialTests {
             authorizationCode: code,
             nonce: nonce,
             email: email,
-            userIdentifier: userID
-        )
+            userIdentifier: userID)
 
         // Then
         #expect(sut.identityToken == token)
@@ -51,8 +50,7 @@ struct AuthCredentialTests {
             identityToken: Data("other".utf8),
             authorizationCode: Data("other".utf8),
             nonce: "other",
-            userIdentifier: "other-user"
-        )
+            userIdentifier: "other-user")
 
         // Then
         #expect(credential1 != credential2)
@@ -89,8 +87,7 @@ struct AuthCredentialTests {
             accessToken: accessToken,
             displayName: name,
             email: email,
-            photoURL: photo
-        )
+            photoURL: photo)
 
         // Then
         #expect(sut.idToken == idToken)

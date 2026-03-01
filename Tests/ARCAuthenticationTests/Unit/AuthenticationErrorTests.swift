@@ -2,25 +2,21 @@ import Foundation
 import Testing
 @testable import ARCAuthentication
 
-@Suite("AuthenticationError Tests")
-struct AuthenticationErrorTests {
+@Suite("AuthenticationError Tests") struct AuthenticationErrorTests {
     // MARK: - Error Descriptions
 
-    @Test("Should provide non-nil errorDescription for all cases", .tags(.unit))
-    func allCasesHaveDescriptions() {
+    @Test("Should provide non-nil errorDescription for all cases", .tags(.unit)) func allCasesHaveDescriptions() {
         // Given
-        let allCases: [AuthenticationError] = [
-            .userCancelled,
-            .providerNotAvailable(.apple),
-            .providerNotAvailable(.google),
-            .invalidIdentityToken,
-            .missingAuthorizationCode,
-            .unexpectedCredentialType,
-            .nonceMismatch,
-            .invalidConfiguration("test"),
-            .systemError("test"),
-            .unknown("test")
-        ]
+        let allCases: [AuthenticationError] = [.userCancelled,
+                                               .providerNotAvailable(.apple),
+                                               .providerNotAvailable(.google),
+                                               .invalidIdentityToken,
+                                               .missingAuthorizationCode,
+                                               .unexpectedCredentialType,
+                                               .nonceMismatch,
+                                               .invalidConfiguration("test"),
+                                               .systemError("test"),
+                                               .unknown("test")]
 
         // Then
         for error in allCases {
@@ -48,8 +44,7 @@ struct AuthenticationErrorTests {
         #expect(error.errorDescription?.contains(message) == true)
     }
 
-    @Test("Should include message in systemError description", .tags(.unit))
-    func systemErrorDescription() {
+    @Test("Should include message in systemError description", .tags(.unit)) func systemErrorDescription() {
         // Given
         let message = "Network unavailable"
         let error = AuthenticationError.systemError(message)
@@ -58,8 +53,7 @@ struct AuthenticationErrorTests {
         #expect(error.errorDescription?.contains(message) == true)
     }
 
-    @Test("Should include message in unknown description", .tags(.unit))
-    func unknownDescription() {
+    @Test("Should include message in unknown description", .tags(.unit)) func unknownDescription() {
         // Given
         let message = "Something went wrong"
         let error = AuthenticationError.unknown(message)
@@ -70,8 +64,7 @@ struct AuthenticationErrorTests {
 
     // MARK: - Equatable
 
-    @Test("Should be equal for same cases with same values", .tags(.unit))
-    func equatable() {
+    @Test("Should be equal for same cases with same values", .tags(.unit)) func equatable() {
         // Given / Then
         #expect(AuthenticationError.userCancelled == .userCancelled)
         #expect(AuthenticationError.invalidIdentityToken == .invalidIdentityToken)
@@ -84,8 +77,7 @@ struct AuthenticationErrorTests {
         #expect(AuthenticationError.unknown("a") == .unknown("a"))
     }
 
-    @Test("Should not be equal for different cases", .tags(.unit))
-    func notEquatable() {
+    @Test("Should not be equal for different cases", .tags(.unit)) func notEquatable() {
         // Given / Then
         #expect(AuthenticationError.userCancelled != .invalidIdentityToken)
         #expect(AuthenticationError.providerNotAvailable(.apple) != .providerNotAvailable(.google))

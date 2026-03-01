@@ -29,10 +29,8 @@ public final class MockCredentialProvider: CredentialProviding, @unchecked Senda
     /// - Parameters:
     ///   - providerType: The provider type to report (default: `.apple`).
     ///   - result: The result to return when credentials are requested.
-    public init(
-        providerType: AuthProviderType = .apple,
-        result: Result<AuthCredential, AuthenticationError> = .success(.apple(.mock)))
-    {
+    public init(providerType: AuthProviderType = .apple,
+                result: Result<AuthCredential, AuthenticationError> = .success(.apple(.mock))) {
         self.providerType = providerType
         self.result = result
     }

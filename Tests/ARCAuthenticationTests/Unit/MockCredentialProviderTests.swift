@@ -1,12 +1,10 @@
 import Testing
 @testable import ARCAuthentication
 
-@Suite("MockCredentialProvider Tests")
-struct MockCredentialProviderTests {
+@Suite("MockCredentialProvider Tests") struct MockCredentialProviderTests {
     // MARK: - Success
 
-    @Test("Should return configured success result", .tags(.unit))
-    func successResult() async throws {
+    @Test("Should return configured success result", .tags(.unit)) func successResult() async throws {
         // Given
         let expected = AuthCredential.apple(.mock)
         let sut = MockCredentialProvider(result: .success(expected))
@@ -18,13 +16,11 @@ struct MockCredentialProviderTests {
         #expect(result == expected)
     }
 
-    @Test("Should return configured Google credential", .tags(.unit))
-    func googleResult() async throws {
+    @Test("Should return configured Google credential", .tags(.unit)) func googleResult() async throws {
         // Given
         let expected = AuthCredential.google(.mock)
-        let sut = MockCredentialProvider(
-            providerType: .google,
-            result: .success(expected))
+        let sut = MockCredentialProvider(providerType: .google,
+                                         result: .success(expected))
 
         // When
         let result = try await sut.requestCredential()
@@ -36,8 +32,7 @@ struct MockCredentialProviderTests {
 
     // MARK: - Failure
 
-    @Test("Should throw configured failure", .tags(.unit))
-    func failureResult() async {
+    @Test("Should throw configured failure", .tags(.unit)) func failureResult() async {
         // Given
         let sut = MockCredentialProvider(result: .failure(.userCancelled))
 
@@ -49,8 +44,7 @@ struct MockCredentialProviderTests {
 
     // MARK: - Call Tracking
 
-    @Test("Should track call count", .tags(.unit))
-    func callCount() async throws {
+    @Test("Should track call count", .tags(.unit)) func callCount() async throws {
         // Given
         let sut = MockCredentialProvider()
         #expect(sut.requestCredentialCallCount == 0)
@@ -66,8 +60,7 @@ struct MockCredentialProviderTests {
 
     // MARK: - Provider Type
 
-    @Test("Should report configured provider type", .tags(.unit))
-    func providerType() {
+    @Test("Should report configured provider type", .tags(.unit)) func providerType() {
         // Given / When
         let appleMock = MockCredentialProvider(providerType: .apple)
         let googleMock = MockCredentialProvider(providerType: .google)
@@ -79,8 +72,7 @@ struct MockCredentialProviderTests {
 
     // MARK: - Default Values
 
-    @Test("Should default to .apple provider type", .tags(.unit))
-    func defaultProviderType() {
+    @Test("Should default to .apple provider type", .tags(.unit)) func defaultProviderType() {
         // Given / When
         let sut = MockCredentialProvider()
 
@@ -88,8 +80,7 @@ struct MockCredentialProviderTests {
         #expect(sut.providerType == .apple)
     }
 
-    @Test("Should default to success with apple mock", .tags(.unit))
-    func defaultResult() async throws {
+    @Test("Should default to success with apple mock", .tags(.unit)) func defaultResult() async throws {
         // Given
         let sut = MockCredentialProvider()
 
@@ -106,8 +97,7 @@ struct MockCredentialProviderTests {
 
     // MARK: - Mutable Result
 
-    @Test("Should allow changing result between calls", .tags(.unit))
-    func mutableResult() async throws {
+    @Test("Should allow changing result between calls", .tags(.unit)) func mutableResult() async throws {
         // Given
         let sut = MockCredentialProvider(result: .success(.apple(.mock)))
 

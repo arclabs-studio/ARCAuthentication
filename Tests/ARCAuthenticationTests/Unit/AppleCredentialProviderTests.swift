@@ -3,12 +3,10 @@ import AuthenticationServices
 import Testing
 @testable import ARCAuthentication
 
-@Suite("AppleCredentialProvider Tests")
-struct AppleCredentialProviderTests {
+@Suite("AppleCredentialProvider Tests") struct AppleCredentialProviderTests {
     #if canImport(UIKit)
     @Test("Should report .apple as provider type", .tags(.unit))
-    @MainActor
-    func providerType() {
+    @MainActor func providerType() {
         // Given
         let sut = AppleCredentialProvider()
 
@@ -17,8 +15,7 @@ struct AppleCredentialProviderTests {
     }
 
     @Test("Should accept custom scopes", .tags(.unit))
-    @MainActor
-    func customScopes() {
+    @MainActor func customScopes() {
         // Given / When
         let sut = AppleCredentialProvider(scopes: [.email])
 
@@ -27,8 +24,7 @@ struct AppleCredentialProviderTests {
     }
 
     @Test("Should accept empty scopes", .tags(.unit))
-    @MainActor
-    func emptyScopes() {
+    @MainActor func emptyScopes() {
         // Given / When
         let sut = AppleCredentialProvider(scopes: [])
 
@@ -39,8 +35,7 @@ struct AppleCredentialProviderTests {
 
     // MARK: - Error Mapping
 
-    @Test("Should map canceled error to userCancelled", .tags(.unit))
-    func mapCanceledError() {
+    @Test("Should map canceled error to userCancelled", .tags(.unit)) func mapCanceledError() {
         // Given
         let error = ASAuthorizationError(.canceled)
 
@@ -51,8 +46,7 @@ struct AppleCredentialProviderTests {
         #expect(result == .userCancelled)
     }
 
-    @Test("Should map invalidResponse error to invalidIdentityToken", .tags(.unit))
-    func mapInvalidResponseError() {
+    @Test("Should map invalidResponse error to invalidIdentityToken", .tags(.unit)) func mapInvalidResponseError() {
         // Given
         let error = ASAuthorizationError(.invalidResponse)
 
@@ -63,8 +57,7 @@ struct AppleCredentialProviderTests {
         #expect(result == .invalidIdentityToken)
     }
 
-    @Test("Should map failed error to systemError", .tags(.unit))
-    func mapFailedError() {
+    @Test("Should map failed error to systemError", .tags(.unit)) func mapFailedError() {
         // Given
         let error = ASAuthorizationError(.failed)
 
@@ -79,8 +72,7 @@ struct AppleCredentialProviderTests {
         }
     }
 
-    @Test("Should map non-ASAuthorizationError to systemError", .tags(.unit))
-    func mapGenericError() {
+    @Test("Should map non-ASAuthorizationError to systemError", .tags(.unit)) func mapGenericError() {
         // Given
         let error = NSError(domain: "test", code: 42)
 

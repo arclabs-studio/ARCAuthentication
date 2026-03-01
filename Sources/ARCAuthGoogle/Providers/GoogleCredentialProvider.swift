@@ -14,8 +14,7 @@ import UIKit
 /// let provider = GoogleCredentialProvider(configuration: config)
 /// let credential = try await provider.requestCredential()
 /// ```
-@MainActor
-public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sendable {
+@MainActor public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sendable {
     // MARK: - Properties
 
     public let providerType: AuthProviderType = .google
@@ -45,10 +44,9 @@ public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sen
             if configuration.additionalScopes.isEmpty {
                 result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController)
             } else {
-                result = try await GIDSignIn.sharedInstance.signIn(
-                    withPresenting: presentingViewController,
-                    hint: nil,
-                    additionalScopes: configuration.additionalScopes)
+                result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController,
+                                                                   hint: nil,
+                                                                   additionalScopes: configuration.additionalScopes)
             }
         } catch {
             throw Self.mapError(error)
@@ -60,12 +58,11 @@ public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sen
             throw AuthenticationError.invalidIdentityToken
         }
 
-        let credential = GoogleCredential(
-            idToken: idToken,
-            accessToken: user.accessToken.tokenString,
-            displayName: user.profile?.name,
-            email: user.profile?.email,
-            photoURL: user.profile?.imageURL(withDimension: 200))
+        let credential = GoogleCredential(idToken: idToken,
+                                          accessToken: user.accessToken.tokenString,
+                                          displayName: user.profile?.name,
+                                          email: user.profile?.email,
+                                          photoURL: user.profile?.imageURL(withDimension: 200))
 
         return .google(credential)
     }
@@ -105,8 +102,7 @@ public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sen
             .compactMap { $0 as? UIWindowScene }
 
         if let activeScene = scenes.first(where: { $0.activationState == .foregroundActive }),
-           let rootVC = activeScene.windows.first(where: { $0.isKeyWindow })?.rootViewController
-        {
+           let rootVC = activeScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
             return topViewController(of: rootVC)
         }
 
@@ -122,13 +118,11 @@ public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sen
             return topViewController(of: presented)
         }
         if let nav = viewController as? UINavigationController,
-           let visible = nav.visibleViewController
-        {
+           let visible = nav.visibleViewController {
             return topViewController(of: visible)
         }
         if let tab = viewController as? UITabBarController,
-           let selected = tab.selectedViewController
-        {
+           let selected = tab.selectedViewController {
             return topViewController(of: selected)
         }
         return viewController

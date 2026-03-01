@@ -57,14 +57,12 @@ public struct AppleCredential: Sendable, Equatable {
     ///   - fullName: Optional name components.
     ///   - email: Optional email address.
     ///   - userIdentifier: The stable Apple user ID.
-    public init(
-        identityToken: Data,
-        authorizationCode: Data,
-        nonce: String,
-        fullName: PersonNameComponents? = nil,
-        email: String? = nil,
-        userIdentifier: String)
-    {
+    public init(identityToken: Data,
+                authorizationCode: Data,
+                nonce: String,
+                fullName: PersonNameComponents? = nil,
+                email: String? = nil,
+                userIdentifier: String) {
         self.identityToken = identityToken
         self.authorizationCode = authorizationCode
         self.nonce = nonce
@@ -74,18 +72,17 @@ public struct AppleCredential: Sendable, Equatable {
     }
 
     /// A mock credential for testing.
-    public static let mock = AppleCredential(
-        identityToken: Data("mock-identity-token".utf8),
-        authorizationCode: Data("mock-auth-code".utf8),
-        nonce: "mock-nonce",
-        fullName: {
-            var name = PersonNameComponents()
-            name.givenName = "John"
-            name.familyName = "Appleseed"
-            return name
-        }(),
-        email: "john@example.com",
-        userIdentifier: "mock-apple-user-id")
+    public static let mock = AppleCredential(identityToken: Data("mock-identity-token".utf8),
+                                             authorizationCode: Data("mock-auth-code".utf8),
+                                             nonce: "mock-nonce",
+                                             fullName: {
+                                                 var name = PersonNameComponents()
+                                                 name.givenName = "John"
+                                                 name.familyName = "Appleseed"
+                                                 return name
+                                             }(),
+                                             email: "john@example.com",
+                                             userIdentifier: "mock-apple-user-id")
 }
 
 /// Credential obtained from Google Sign-In.
@@ -115,13 +112,11 @@ public struct GoogleCredential: Sendable, Equatable {
     ///   - displayName: Optional display name.
     ///   - email: Optional email address.
     ///   - photoURL: Optional profile photo URL.
-    public init(
-        idToken: String,
-        accessToken: String,
-        displayName: String? = nil,
-        email: String? = nil,
-        photoURL: URL? = nil)
-    {
+    public init(idToken: String,
+                accessToken: String,
+                displayName: String? = nil,
+                email: String? = nil,
+                photoURL: URL? = nil) {
         self.idToken = idToken
         self.accessToken = accessToken
         self.displayName = displayName
@@ -130,10 +125,9 @@ public struct GoogleCredential: Sendable, Equatable {
     }
 
     /// A mock credential for testing.
-    public static let mock = GoogleCredential(
-        idToken: "mock-google-id-token",
-        accessToken: "mock-google-access-token",
-        displayName: "John Doe",
-        email: "john@gmail.com",
-        photoURL: URL(string: "https://example.com/photo.jpg"))
+    public static let mock = GoogleCredential(idToken: "mock-google-id-token",
+                                              accessToken: "mock-google-access-token",
+                                              displayName: "John Doe",
+                                              email: "john@gmail.com",
+                                              photoURL: URL(string: "https://example.com/photo.jpg"))
 }

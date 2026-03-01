@@ -28,11 +28,9 @@ public struct AppleSignInButton: View {
     ///   - type: Button label type (default: `.signIn`).
     ///   - style: Visual style (default: `.black`).
     ///   - action: Closure executed when the button is tapped.
-    public init(
-        type: SignInWithAppleButton.Label = .signIn,
-        style: SignInWithAppleButton.Style = .black,
-        action: @escaping () -> Void)
-    {
+    public init(type: SignInWithAppleButton.Label = .signIn,
+                style: SignInWithAppleButton.Style = .black,
+                action: @escaping () -> Void) {
         self.type = type
         self.style = style
         self.action = action
@@ -41,10 +39,9 @@ public struct AppleSignInButton: View {
     // MARK: - Body
 
     public var body: some View {
-        SignInWithAppleButton(
-            type,
-            onRequest: { _ in },
-            onCompletion: { _ in })
+        SignInWithAppleButton(type,
+                              onRequest: { _ in },
+                              onCompletion: { _ in })
             .signInWithAppleButtonStyle(style)
             .frame(height: 50)
             .allowsHitTesting(false)

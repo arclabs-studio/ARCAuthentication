@@ -47,8 +47,7 @@ import UIKit
 /// - `email` and `fullName` are only provided on the **first** sign-in.
 /// - The `identityToken` is a JWT that must be verified on the server.
 /// - The `authorizationCode` expires in 5 minutes.
-@MainActor
-public final class AppleCredentialProvider: NSObject, CredentialProviding, @unchecked Sendable {
+@MainActor public final class AppleCredentialProvider: NSObject, CredentialProviding, @unchecked Sendable {
     // MARK: - Properties
 
     public let providerType: AuthProviderType = .apple
@@ -96,10 +95,8 @@ public final class AppleCredentialProvider: NSObject, CredentialProviding, @unch
 // MARK: - ASAuthorizationControllerDelegate
 
 extension AppleCredentialProvider: ASAuthorizationControllerDelegate {
-    public nonisolated func authorizationController(
-        controller _: ASAuthorizationController,
-        didCompleteWithAuthorization authorization: ASAuthorization)
-    {
+    public nonisolated func authorizationController(controller _: ASAuthorizationController,
+                                                    didCompleteWithAuthorization authorization: ASAuthorization) {
         Task { @MainActor in
             guard let appleCredential = authorization.credential as? ASAuthorizationAppleIDCredential else {
                 authContinuation?.resume(throwing: AuthenticationError.unexpectedCredentialType)
@@ -125,13 +122,12 @@ extension AppleCredentialProvider: ASAuthorizationControllerDelegate {
                 return
             }
 
-            let credential = AppleCredential(
-                identityToken: identityTokenData,
-                authorizationCode: authorizationCodeData,
-                nonce: nonce,
-                fullName: appleCredential.fullName,
-                email: appleCredential.email,
-                userIdentifier: appleCredential.user)
+            let credential = AppleCredential(identityToken: identityTokenData,
+                                             authorizationCode: authorizationCodeData,
+                                             nonce: nonce,
+                                             fullName: appleCredential.fullName,
+                                             email: appleCredential.email,
+                                             userIdentifier: appleCredential.user)
 
             authContinuation?.resume(returning: .apple(credential))
             authContinuation = nil
@@ -139,10 +135,8 @@ extension AppleCredentialProvider: ASAuthorizationControllerDelegate {
         }
     }
 
-    public nonisolated func authorizationController(
-        controller _: ASAuthorizationController,
-        didCompleteWithError error: Error)
-    {
+    public nonisolated func authorizationController(controller _: ASAuthorizationController,
+                                                    didCompleteWithError error: Error) {
         Task { @MainActor in
             authContinuation?.resume(throwing: AppleAuthErrorMapper.mapError(error))
             authContinuation = nil
@@ -160,14 +154,12 @@ extension AppleCredentialProvider: ASAuthorizationControllerPresentationContextP
                 .compactMap { $0 as? UIWindowScene }
 
             if let activeScene = scenes.first(where: { $0.activationState == .foregroundActive }),
-               let keyWindow = activeScene.windows.first(where: { $0.isKeyWindow })
-            {
+               let keyWindow = activeScene.windows.first(where: { $0.isKeyWindow }) {
                 return keyWindow
             }
 
             if let activeScene = scenes.first(where: { $0.activationState == .foregroundActive }),
-               let window = activeScene.windows.first
-            {
+               let window = activeScene.windows.first {
                 return window
             }
 

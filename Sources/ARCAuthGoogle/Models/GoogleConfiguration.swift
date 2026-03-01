@@ -22,10 +22,8 @@ public struct GoogleConfiguration: Sendable {
     /// - Parameters:
     ///   - clientID: The OAuth client ID.
     ///   - additionalScopes: Extra scopes to request (default: none).
-    public init(
-        clientID: String,
-        additionalScopes: [String] = [])
-    {
+    public init(clientID: String,
+                additionalScopes: [String] = []) {
         self.clientID = clientID
         self.additionalScopes = additionalScopes
     }

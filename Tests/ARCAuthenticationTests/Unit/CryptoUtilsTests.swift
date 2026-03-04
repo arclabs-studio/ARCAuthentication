@@ -2,7 +2,8 @@ import Foundation
 import Testing
 @testable import ARCAuthentication
 
-@Suite("CryptoUtils Tests") struct CryptoUtilsTests {
+@Suite("CryptoUtils Tests")
+struct CryptoUtilsTests {
     // MARK: - Nonce Generation
 
     @Test("Should generate nonce with default length of 32", .tags(.unit)) func nonceDefaultLength() {

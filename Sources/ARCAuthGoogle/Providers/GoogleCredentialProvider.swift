@@ -14,7 +14,8 @@ import UIKit
 /// let provider = GoogleCredentialProvider(configuration: config)
 /// let credential = try await provider.requestCredential()
 /// ```
-@MainActor public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sendable {
+@MainActor
+public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sendable {
     // MARK: - Properties
 
     public let providerType: AuthProviderType = .google

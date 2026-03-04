@@ -2,7 +2,8 @@ import Foundation
 import Testing
 @testable import ARCAuthentication
 
-@Suite("AuthenticationError Tests") struct AuthenticationErrorTests {
+@Suite("AuthenticationError Tests")
+struct AuthenticationErrorTests {
     // MARK: - Error Descriptions
 
     @Test("Should provide non-nil errorDescription for all cases", .tags(.unit)) func allCasesHaveDescriptions() {

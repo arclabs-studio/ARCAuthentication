@@ -2,7 +2,8 @@ import Foundation
 import Testing
 @testable import ARCAuthentication
 
-@Suite("AuthCredential Tests") struct AuthCredentialTests {
+@Suite("AuthCredential Tests")
+struct AuthCredentialTests {
     // MARK: - AppleCredential
 
     @Test("Should create AppleCredential with all properties", .tags(.unit)) func appleCredentialInit() {

@@ -3,7 +3,8 @@ import AuthenticationServices
 import Testing
 @testable import ARCAuthentication
 
-@Suite("AppleCredentialProvider Tests") struct AppleCredentialProviderTests {
+@Suite("AppleCredentialProvider Tests")
+struct AppleCredentialProviderTests {
     #if canImport(UIKit)
     @Test("Should report .apple as provider type", .tags(.unit))
     @MainActor func providerType() {

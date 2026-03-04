@@ -2,7 +2,8 @@ import Testing
 @testable import ARCAuthentication
 @testable import ARCAuthGoogle
 
-@Suite("GoogleCredentialProvider Tests") struct GoogleCredentialProviderTests {
+@Suite("GoogleCredentialProvider Tests")
+struct GoogleCredentialProviderTests {
     // MARK: - GoogleConfiguration
 
     @Test("Should create GoogleConfiguration with client ID", .tags(.unit)) func configurationInit() {

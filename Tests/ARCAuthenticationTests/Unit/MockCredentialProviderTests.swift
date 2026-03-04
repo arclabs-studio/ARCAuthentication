@@ -1,7 +1,8 @@
 import Testing
 @testable import ARCAuthentication
 
-@Suite("MockCredentialProvider Tests") struct MockCredentialProviderTests {
+@Suite("MockCredentialProvider Tests")
+struct MockCredentialProviderTests {
     // MARK: - Success
 
     @Test("Should return configured success result", .tags(.unit)) func successResult() async throws {

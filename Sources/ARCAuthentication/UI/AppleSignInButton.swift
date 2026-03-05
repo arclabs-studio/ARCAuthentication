@@ -2,15 +2,15 @@
 import AuthenticationServices
 import SwiftUI
 
-/// A thin wrapper around `SignInWithAppleButton` with adaptive dark/light style support.
+/// A thin wrapper around `SignInWithAppleButton`.
 ///
-/// When no style is provided the button automatically selects `.black` in light mode
-/// and `.white` in dark mode, using `@Environment(\.colorScheme)` — unlike
-/// `UITraitCollection.current` this reacts to runtime appearance changes.
+/// The default adaptive init uses `.automatic` style (iOS 15.4+), which
+/// lets the system render the correct black/white appearance for the
+/// current color scheme — no manual dark/light detection needed.
 ///
 /// ## Usage
 /// ```swift
-/// // Adaptive (recommended)
+/// // Adaptive — recommended
 /// AppleSignInButton {
 ///     let credential = try await provider.requestCredential()
 /// }
@@ -30,6 +30,9 @@ public struct AppleSignInButton: View {
     // MARK: - Initialization
 
     /// Creates an adaptive Sign in with Apple button.
+    ///
+    /// Selects `.black` in light mode and `.white` in dark mode via
+    /// `@Environment(\.colorScheme)` — reacts to runtime appearance changes.
     /// - Parameters:
     ///   - type: Button label type (default: `.signIn`).
     ///   - action: Closure executed when the button is tapped.
@@ -55,6 +58,10 @@ public struct AppleSignInButton: View {
 
     // MARK: - Body
 
+    private var resolvedStyle: SignInWithAppleButton.Style {
+        style ?? (colorScheme == .dark ? .white : .black)
+    }
+
     public var body: some View {
         SignInWithAppleButton(type,
                               onRequest: { _ in },
@@ -70,17 +77,11 @@ public struct AppleSignInButton: View {
                     }
             }
     }
-
-    // MARK: - Private
-
-    private var resolvedStyle: SignInWithAppleButton.Style {
-        style ?? (colorScheme == .dark ? .white : .black)
-    }
 }
 
 // MARK: - Preview
 
-#Preview("Adaptive") {
+#Preview("Adaptive (automatic)") {
     VStack(spacing: 20) {
         AppleSignInButton(type: .signIn) {}
         AppleSignInButton(type: .signUp) {}

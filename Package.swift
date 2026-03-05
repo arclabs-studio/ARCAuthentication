@@ -22,8 +22,7 @@ let package = Package(name: "ARCAuthentication",
 
                           .target(name: "ARCAuthGoogle",
                                   dependencies: ["ARCAuthentication",
-                                                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
-                                                 .product(name: "GoogleSignInSwift", package: "GoogleSignIn-iOS")]),
+                                                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS")]),
                           .testTarget(name: "ARCAuthGoogleTests",
                                       dependencies: ["ARCAuthGoogle"])],
                       swiftLanguageModes: [.v6])

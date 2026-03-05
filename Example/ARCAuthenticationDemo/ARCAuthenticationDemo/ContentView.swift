@@ -96,41 +96,13 @@ struct LoginView: View {
 
             VStack(spacing: 16) {
                 AppleSignInButton(action: onAppleSignIn)
-                    .frame(height: 50)
-
                 GoogleSignInButton(action: onGoogleSignIn)
-                    .frame(height: 50)
             }
             .padding(.horizontal, 32)
 
             Spacer()
         }
         .padding()
-    }
-}
-
-// MARK: - Google Sign-In Button
-
-struct GoogleSignInButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                Image(systemName: "g.circle.fill")
-                    .font(.title2)
-                Text("Sign in with Google")
-                    .fontWeight(.medium)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .background(Color(.systemBackground))
-            .foregroundStyle(.primary)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8)
-                .stroke(Color(.separator), lineWidth: 1))
-        }
-        .buttonStyle(.plain)
     }
 }
 

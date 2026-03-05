@@ -180,6 +180,85 @@ let config = GoogleConfiguration(
 )
 ```
 
+## UI Components
+
+ARCAuthentication ships ready-to-use SwiftUI sign-in buttons that follow platform and brand guidelines out of the box. Use these instead of building your own.
+
+### AppleSignInButton
+
+A thin wrapper around the system `SignInWithAppleButton` that automatically applies the correct style for the current color scheme — black in light mode, white in dark mode — following [Apple Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/sign-in-with-apple).
+
+```swift
+import ARCAuthentication
+import SwiftUI
+
+AppleSignInButton {
+    Task { await signInWithApple() }
+}
+```
+
+You can also pin a specific label and style:
+
+```swift
+// Sign up vs sign in labels
+AppleSignInButton(type: .signUp) { ... }
+AppleSignInButton(type: .continue) { ... }
+
+// Fixed styles (bypasses adaptive logic)
+AppleSignInButton(type: .signIn, style: .white) { ... }
+AppleSignInButton(type: .signIn, style: .whiteOutline) { ... }
+```
+
+**Color behavior:**
+| Mode | Background | Text / Logo |
+|------|------------|-------------|
+| Light | `#000000` (black) | `#FFFFFF` (white) |
+| Dark  | `#FFFFFF` (white) | `#000000` (black) |
+
+### GoogleSignInButton
+
+A custom SwiftUI button that follows [Google Identity 2024 branding guidelines](https://developers.google.com/identity/branding-guidelines). The Google "G" logo always renders on a white tile; the surrounding button adapts to the color scheme.
+
+```swift
+import ARCAuthGoogle
+import SwiftUI
+
+GoogleSignInButton {
+    Task { await signInWithGoogle() }
+}
+```
+
+**Color behavior:**
+| Mode | Background | Border | Text |
+|------|------------|--------|------|
+| Light | `#FFFFFF` | `#747775` | `#1F1F1F` |
+| Dark  | `#131314` | `#8E918F` | `#E3E3E3` |
+
+> **Note:** The previous Google blue (`#4285F4`) was deprecated in March 2023 with the Google Sign-In JS v1 shutdown. The current guidelines use neutral backgrounds as shown above.
+
+### Putting it Together
+
+```swift
+import ARCAuthentication
+import ARCAuthGoogle
+import SwiftUI
+
+struct LoginView: View {
+    let onAppleSignIn: () -> Void
+    let onGoogleSignIn: () -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            AppleSignInButton(action: onAppleSignIn)
+            GoogleSignInButton(action: onGoogleSignIn)
+        }
+        .padding(.horizontal, 32)
+    }
+}
+```
+
+Both buttons handle their own `frame` and visual styling — you do not need to apply `.frame(height:)` or background modifiers. Both respond to color scheme changes automatically.
+
 ## Using Multiple Providers
 
 Both providers conform to ``CredentialProviding``, so you can write generic sign-in logic:

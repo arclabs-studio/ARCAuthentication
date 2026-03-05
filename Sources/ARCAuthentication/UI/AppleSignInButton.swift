@@ -68,6 +68,9 @@ public struct AppleSignInButton: View {
                               onCompletion: { _ in })
             .signInWithAppleButtonStyle(resolvedStyle)
             .frame(height: 50)
+            // Force view recreation on color scheme change so the native
+            // SignInWithAppleButton always renders with the correct style.
+            .id(colorScheme)
             .allowsHitTesting(false)
             .overlay {
                 Color.clear

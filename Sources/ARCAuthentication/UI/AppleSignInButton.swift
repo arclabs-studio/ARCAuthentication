@@ -21,7 +21,7 @@ import SwiftUI
 public struct AppleSignInButton: View {
     // MARK: - Properties
 
-    private let type: SignInWithAppleButton.Label
+    private let type: ARCAppleButtonLabel
     private let style: SignInWithAppleButton.Style?
     private let action: () -> Void
 
@@ -36,7 +36,7 @@ public struct AppleSignInButton: View {
     /// - Parameters:
     ///   - type: Button label type (default: `.signIn`).
     ///   - action: Closure executed when the button is tapped.
-    public init(type: SignInWithAppleButton.Label = .signIn,
+    public init(type: ARCAppleButtonLabel = .signIn,
                 action: @escaping () -> Void) {
         self.type = type
         style = nil
@@ -48,7 +48,7 @@ public struct AppleSignInButton: View {
     ///   - type: Button label type (default: `.signIn`).
     ///   - style: Visual style.
     ///   - action: Closure executed when the button is tapped.
-    public init(type: SignInWithAppleButton.Label = .signIn,
+    public init(type: ARCAppleButtonLabel = .signIn,
                 style: SignInWithAppleButton.Style,
                 action: @escaping () -> Void) {
         self.type = type
@@ -63,7 +63,7 @@ public struct AppleSignInButton: View {
     }
 
     public var body: some View {
-        SignInWithAppleButton(type,
+        SignInWithAppleButton(type.nativeLabel,
                               onRequest: { _ in },
                               onCompletion: { _ in })
             .signInWithAppleButtonStyle(resolvedStyle)

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `ARCAppleButtonLabel` enum wrapping `SignInWithAppleButton.Label` cases (`.signIn`, `.signUp`, `.continue`) — callers no longer need to `import AuthenticationServices` to use `AppleSignInButton`
 - Google Sign-In to the demo app alongside Sign in with Apple
 - Demo app README with full Google Sign-In configuration guide
 - Comprehensive documentation for Google Sign-In setup in DocC Getting Started guide

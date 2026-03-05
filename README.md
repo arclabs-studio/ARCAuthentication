@@ -94,6 +94,7 @@ struct LoginView: View {
     let provider = AppleCredentialProvider()
 
     var body: some View {
+        // Adaptive — recommended (black in light mode, white in dark mode)
         AppleSignInButton {
             Task {
                 let credential = try await provider.requestCredential()
@@ -101,9 +102,21 @@ struct LoginView: View {
             }
         }
         .frame(height: 50)
+
+        // Custom label type
+        AppleSignInButton(type: .signUp) {
+            Task { let credential = try await provider.requestCredential() }
+        }
+
+        // Fixed style (ignores color scheme)
+        AppleSignInButton(type: .continue, style: .whiteOutline) {
+            Task { let credential = try await provider.requestCredential() }
+        }
     }
 }
 ```
+
+`AppleSignInButton` accepts an `ARCAppleButtonLabel` for its `type` parameter — no `import AuthenticationServices` required in caller code. Available cases: `.signIn` (default), `.signUp`, `.continue`.
 
 ### Google Sign-In
 
@@ -203,7 +216,8 @@ Sources/ARCAuthentication/
 ├── Utilities/
 │   └── CryptoUtils               # Nonce + SHA256
 ├── UI/
-│   └── AppleSignInButton         # SwiftUI wrapper
+│   ├── AppleSignInButton         # SwiftUI wrapper
+│   └── ARCAppleButtonLabel       # Button label enum (.signIn, .signUp, .continue)
 └── Testing/
     └── MockCredentialProvider     # Test double
 

@@ -2,34 +2,51 @@
 import AuthenticationServices
 import SwiftUI
 
-/// A thin wrapper around `SignInWithAppleButton`.
+/// A thin wrapper around `SignInWithAppleButton` with adaptive dark/light style support.
 ///
-/// Provides a simple, configurable Sign in with Apple button that
-/// delegates the action entirely to the caller.
+/// When no style is provided the button automatically selects `.black` in light mode
+/// and `.white` in dark mode, using `@Environment(\.colorScheme)` — unlike
+/// `UITraitCollection.current` this reacts to runtime appearance changes.
 ///
 /// ## Usage
 /// ```swift
+/// // Adaptive (recommended)
 /// AppleSignInButton {
 ///     let credential = try await provider.requestCredential()
-///     // Send credential to backend...
 /// }
+///
+/// // Fixed style
+/// AppleSignInButton(style: .whiteOutline) { ... }
 /// ```
 public struct AppleSignInButton: View {
     // MARK: - Properties
 
     private let type: SignInWithAppleButton.Label
-    private let style: SignInWithAppleButton.Style
+    private let style: SignInWithAppleButton.Style?
     private let action: () -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
 
     // MARK: - Initialization
 
-    /// Creates a Sign in with Apple button.
+    /// Creates an adaptive Sign in with Apple button.
     /// - Parameters:
     ///   - type: Button label type (default: `.signIn`).
-    ///   - style: Visual style (default: `.black`).
     ///   - action: Closure executed when the button is tapped.
     public init(type: SignInWithAppleButton.Label = .signIn,
-                style: SignInWithAppleButton.Style = .black,
+                action: @escaping () -> Void) {
+        self.type = type
+        style = nil
+        self.action = action
+    }
+
+    /// Creates a Sign in with Apple button with a fixed style.
+    /// - Parameters:
+    ///   - type: Button label type (default: `.signIn`).
+    ///   - style: Visual style.
+    ///   - action: Closure executed when the button is tapped.
+    public init(type: SignInWithAppleButton.Label = .signIn,
+                style: SignInWithAppleButton.Style,
                 action: @escaping () -> Void) {
         self.type = type
         self.style = style
@@ -42,7 +59,7 @@ public struct AppleSignInButton: View {
         SignInWithAppleButton(type,
                               onRequest: { _ in },
                               onCompletion: { _ in })
-            .signInWithAppleButtonStyle(style)
+            .signInWithAppleButtonStyle(resolvedStyle)
             .frame(height: 50)
             .allowsHitTesting(false)
             .overlay {
@@ -53,16 +70,32 @@ public struct AppleSignInButton: View {
                     }
             }
     }
+
+    // MARK: - Private
+
+    private var resolvedStyle: SignInWithAppleButton.Style {
+        style ?? (colorScheme == .dark ? .white : .black)
+    }
 }
 
 // MARK: - Preview
 
-#Preview {
+#Preview("Adaptive") {
     VStack(spacing: 20) {
-        AppleSignInButton(type: .signIn, style: .black) {}
-        AppleSignInButton(type: .continue, style: .white) {}
-        AppleSignInButton(type: .signUp, style: .whiteOutline) {}
+        AppleSignInButton(type: .signIn) {}
+        AppleSignInButton(type: .signUp) {}
+        AppleSignInButton(type: .continue) {}
     }
     .padding()
+}
+
+#Preview("Fixed styles") {
+    VStack(spacing: 20) {
+        AppleSignInButton(type: .signIn, style: .black) {}
+        AppleSignInButton(type: .signIn, style: .white) {}
+        AppleSignInButton(type: .signIn, style: .whiteOutline) {}
+    }
+    .padding()
+    .background(.gray)
 }
 #endif

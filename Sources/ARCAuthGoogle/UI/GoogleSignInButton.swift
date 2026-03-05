@@ -46,7 +46,8 @@ public struct GoogleSignInButton: View {
                 Color.clear
                     .frame(width: 44, height: 44)
             }
-            .frame(maxWidth: .infinity, height: 44)
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
         }
         .background(backgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))

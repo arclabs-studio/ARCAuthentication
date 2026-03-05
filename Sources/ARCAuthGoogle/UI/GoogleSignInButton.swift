@@ -33,51 +33,76 @@ public struct GoogleSignInButton: View {
 
     public var body: some View {
         Button(action: action) {
-            HStack(spacing: 10) {
-                Spacer(minLength: 0)
-                googleLogo
-                    .frame(width: 18, height: 18)
+            HStack(spacing: 0) {
+                googleLogoTile
+                    .frame(width: 44, height: 44)
+
                 Text("Sign in with Google")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(foregroundColor)
-                Spacer(minLength: 0)
+                    .frame(maxWidth: .infinity)
+
+                // Balance the logo width so text is visually centered
+                Color.clear
+                    .frame(width: 44, height: 44)
             }
-            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40)
+            .frame(maxWidth: .infinity, height: 44)
         }
         .background(backgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 2))
-        .shadow(color: .black.opacity(colorScheme == .dark ? 0 : 0.15), radius: 1, x: 0, y: 2)
+        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
         .overlay {
-            if colorScheme == .dark {
-                RoundedRectangle(cornerRadius: 2)
-                    .strokeBorder(.white.opacity(0.24), lineWidth: 1)
-            }
+            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                .strokeBorder(borderColor, lineWidth: 1)
         }
     }
 
-    // MARK: - Private
+    // MARK: - Colors (Google Identity 2024 brand guidelines)
+
+    //
+    // Light: white #FFFFFF background, #747775 border, #1F1F1F text
+    // Dark:  #131314 background, #8E918F border, #E3E3E3 text
+    // Source: https://developers.google.com/identity/branding-guidelines
 
     private var backgroundColor: Color {
-        colorScheme == .dark ? Color(red: 0.259, green: 0.522, blue: 0.957) : .white
+        colorScheme == .dark
+            ? Color(red: 0.075, green: 0.075, blue: 0.078) // #131314
+            : .white // #FFFFFF
     }
 
     private var foregroundColor: Color {
-        colorScheme == .dark ? .white : Color(red: 0.235, green: 0.251, blue: 0.263)
+        colorScheme == .dark
+            ? Color(red: 0.890, green: 0.890, blue: 0.890) // #E3E3E3
+            : Color(red: 0.122, green: 0.122, blue: 0.122) // #1F1F1F
     }
 
-    @ViewBuilder private var googleLogo: some View {
-        if let uiImage = loadGoogleLogo() {
-            Image(uiImage: uiImage)
-                .resizable()
-                .scaledToFit()
-        } else {
+    private var borderColor: Color {
+        colorScheme == .dark
+            ? Color(red: 0.557, green: 0.569, blue: 0.561) // #8E918F
+            : Color(red: 0.455, green: 0.467, blue: 0.459) // #747775
+    }
+
+    // MARK: - Logo
+
+    //
+    // Per Google guidelines: the "G" logo must always appear on a white tile.
+
+    private var googleLogoTile: some View {
+        ZStack {
+            // White tile ensures logo visibility in all modes
             Circle()
-                .fill(Color(red: 0.259, green: 0.522, blue: 0.957))
-                .overlay {
-                    Text("G")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.white)
-                }
+                .fill(Color.white)
+                .frame(width: 28, height: 28)
+
+            if let uiImage = loadGoogleLogo() {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 18, height: 18)
+            } else {
+                Text("G")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color(red: 0.259, green: 0.522, blue: 0.957))
+            }
         }
     }
 

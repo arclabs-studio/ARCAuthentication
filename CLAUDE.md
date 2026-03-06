@@ -14,7 +14,7 @@ Two library targets:
 
 ```bash
 swift build              # Build both targets
-swift test --parallel    # Run all tests (39 tests across 2 suites)
+swift test --parallel    # Run all tests (48 tests across 8 suites on macOS)
 make lint                # SwiftLint (config: .swiftlint.yml)
 make format              # SwiftFormat dry-run (config: .swiftformat)
 make fix                 # Apply SwiftFormat

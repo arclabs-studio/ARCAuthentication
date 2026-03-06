@@ -50,7 +50,7 @@ public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sen
                                                                    additionalScopes: configuration.additionalScopes)
             }
         } catch {
-            throw Self.mapError(error)
+            throw GoogleAuthErrorMapper.mapError(error)
         }
 
         let user = result.user
@@ -68,50 +68,13 @@ public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sen
         return .google(credential)
     }
 
-    // MARK: - Error Mapping
-
-    /// Maps GIDSignInError codes to AuthenticationError.
-    static func mapError(_ error: Error) -> AuthenticationError {
-        let nsError = error as NSError
-
-        guard nsError.domain == GIDSignInError.errorDomain else {
-            return .systemError(error.localizedDescription)
-        }
-
-        guard let code = GIDSignInError.Code(rawValue: nsError.code) else {
-            return .unknown(error.localizedDescription)
-        }
-
-        switch code {
-        case .canceled:
-            return .userCancelled
-        case .hasNoAuthInKeychain:
-            return .providerNotAvailable(.google)
-        case .scopesAlreadyGranted:
-            return .systemError("Requested scopes were already granted")
-        case .EMM:
-            return .systemError("Enterprise Mobility Management error")
-        @unknown default:
-            return .unknown(error.localizedDescription)
-        }
-    }
-
     // MARK: - Private Methods
 
     private func findPresentingViewController() -> UIViewController? {
-        let scenes = UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-
-        if let activeScene = scenes.first(where: { $0.activationState == .foregroundActive }),
-           let rootVC = activeScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
-            return topViewController(of: rootVC)
+        guard let rootVC = UIApplication.shared.arcKeyWindow?.rootViewController else {
+            return nil
         }
-
-        if let rootVC = scenes.flatMap(\.windows).first?.rootViewController {
-            return topViewController(of: rootVC)
-        }
-
-        return nil
+        return topViewController(of: rootVC)
     }
 
     private func topViewController(of viewController: UIViewController) -> UIViewController {

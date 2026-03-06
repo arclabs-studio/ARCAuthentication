@@ -290,7 +290,7 @@ make test    # Run tests
 
 ---
 
-## License
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE) for details.
 

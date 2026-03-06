@@ -2,10 +2,12 @@
 import GoogleSignIn
 import SwiftUI
 
-/// A Google Sign-In button with centered content following Google's branding guidelines.
+/// A Google Sign-In button following Google's Identity branding guidelines.
 ///
 /// Loads the official Google "G" logo from the GoogleSignIn resource bundle at runtime.
 /// Falls back to a styled placeholder if the bundle is unavailable.
+///
+/// **Layout spec (iOS):** 16pt leading padding · G logo · 12pt gap · centered text · 16pt trailing padding.
 ///
 /// ## Usage
 /// ```swift
@@ -33,20 +35,22 @@ public struct GoogleSignInButton: View {
 
     public var body: some View {
         Button(action: action) {
-            HStack(spacing: 0) {
+            HStack(spacing: 12) {
                 googleLogoTile
-                    .frame(width: 44, height: 44)
+                    .frame(width: 20, height: 20)
 
                 Text("Sign in with Google")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(foregroundColor)
                     .frame(maxWidth: .infinity)
 
-                // Balance the logo width so text is visually centered
+                // Mirrors logo width so text is visually centered in the full button
                 Color.clear
-                    .frame(width: 44, height: 44)
+                    .frame(width: 20, height: 20)
             }
-            .frame(maxWidth: .infinity, height: 44)
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
         }
         .background(backgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
@@ -56,7 +60,7 @@ public struct GoogleSignInButton: View {
         }
     }
 
-    // MARK: - Colors (Google Identity 2024 brand guidelines)
+    // MARK: - Colors (Google Identity branding guidelines)
 
     //
     // Light: white #FFFFFF background, #747775 border, #1F1F1F text
@@ -84,20 +88,22 @@ public struct GoogleSignInButton: View {
     // MARK: - Logo
 
     //
-    // Per Google guidelines: the "G" logo must always appear on a white tile.
+    // Google guidelines: the "G" logo must always appear on a white background.
+    // Light mode: button background is already white — no separate tile needed.
+    // Dark mode: white rounded-rect tile placed behind the logo.
 
     private var googleLogoTile: some View {
         ZStack {
-            // White tile ensures logo visibility in all modes
-            Circle()
-                .fill(Color.white)
-                .frame(width: 28, height: 28)
+            if colorScheme == .dark {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.white)
+                    .frame(width: 24, height: 24)
+            }
 
             if let uiImage = loadGoogleLogo() {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 18, height: 18)
             } else {
                 Text("G")
                     .font(.system(size: 13, weight: .bold))

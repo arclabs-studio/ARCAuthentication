@@ -151,24 +151,11 @@ extension AppleCredentialProvider: ASAuthorizationControllerDelegate {
 extension AppleCredentialProvider: ASAuthorizationControllerPresentationContextProviding {
     public nonisolated func presentationAnchor(for _: ASAuthorizationController) -> ASPresentationAnchor {
         MainActor.assumeIsolated {
-            let scenes = UIApplication.shared.connectedScenes
-                .compactMap { $0 as? UIWindowScene }
-
-            if let activeScene = scenes.first(where: { $0.activationState == .foregroundActive }),
-               let keyWindow = activeScene.windows.first(where: { $0.isKeyWindow }) {
-                return keyWindow
-            }
-
-            if let activeScene = scenes.first(where: { $0.activationState == .foregroundActive }),
-               let window = activeScene.windows.first {
-                return window
-            }
-
-            if let window = scenes.flatMap(\.windows).first {
-                return window
-            }
-
-            return UIWindow()
+            // arcKeyWindow traverses foreground-active scenes first via UIWindowScene.keyWindow,
+            // then falls back to any available window.
+            // The UIWindow() fallback is unreachable in a running foreground iOS 17+ app; it
+            // satisfies the non-optional return type required by ASAuthorizationControllerPresentationContextProviding.
+            UIApplication.shared.arcKeyWindow ?? UIWindow()
         }
     }
 }

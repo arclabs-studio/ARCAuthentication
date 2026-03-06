@@ -63,6 +63,11 @@ public struct AppleSignInButton: View {
     }
 
     public var body: some View {
+        // Tap-interception pattern: SignInWithAppleButton does not support an async action closure
+        // directly — its onRequest/onCompletion callbacks are synchronous and don't fit the
+        // async/await credential request model. Instead the native button is rendered as a visual
+        // shell (.allowsHitTesting(false) + no-op callbacks) and a transparent overlay captures
+        // taps to invoke the async `action` closure passed by the caller.
         SignInWithAppleButton(type.nativeLabel,
                               onRequest: { _ in },
                               onCompletion: { _ in })

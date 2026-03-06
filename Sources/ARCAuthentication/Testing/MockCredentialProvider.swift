@@ -1,3 +1,5 @@
+import Foundation
+
 /// A configurable mock credential provider for consumer testing.
 ///
 /// Use this in your app's tests to simulate authentication flows
@@ -17,11 +19,20 @@ public final class MockCredentialProvider: CredentialProviding, @unchecked Senda
 
     public let providerType: AuthProviderType
 
+    private let lock = NSLock()
+    private var _result: Result<AuthCredential, AuthenticationError>
+    private var _requestCredentialCallCount = 0
+
     /// The result to return from ``requestCredential()``.
-    public var result: Result<AuthCredential, AuthenticationError>
+    public var result: Result<AuthCredential, AuthenticationError> {
+        get { lock.withLock { _result } }
+        set { lock.withLock { _result = newValue } }
+    }
 
     /// The number of times ``requestCredential()`` has been called.
-    public private(set) var requestCredentialCallCount = 0
+    public var requestCredentialCallCount: Int {
+        lock.withLock { _requestCredentialCallCount }
+    }
 
     // MARK: - Initialization
 
@@ -32,13 +43,13 @@ public final class MockCredentialProvider: CredentialProviding, @unchecked Senda
     public init(providerType: AuthProviderType = .apple,
                 result: Result<AuthCredential, AuthenticationError> = .success(.apple(.mock))) {
         self.providerType = providerType
-        self.result = result
+        _result = result
     }
 
     // MARK: - CredentialProviding
 
     public func requestCredential() async throws -> AuthCredential {
-        requestCredentialCallCount += 1
+        lock.withLock { _requestCredentialCallCount += 1 }
         return try result.get()
     }
 }

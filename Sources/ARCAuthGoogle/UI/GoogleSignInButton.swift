@@ -7,15 +7,37 @@ import SwiftUI
 /// Loads the official Google "G" logo from the GoogleSignIn resource bundle at runtime.
 /// Falls back to a styled placeholder if the bundle is unavailable.
 ///
-/// Logo and label are centered together as a unit, matching the visual rhythm of `AppleSignInButton`.
+/// Logo and label are centered together as a unit, matching the visual rhythm of
+/// ``AppleSignInButton``. Colours adapt automatically to light and dark mode.
 ///
 /// ## Usage
+///
 /// ```swift
+/// // Default — "Sign in with Google"
 /// GoogleSignInButton {
 ///     let credential = try await provider.requestCredential()
-///     // Send credential to backend...
+/// }
+///
+/// // Sign-up variant
+/// GoogleSignInButton(label: .signUp) {
+///     let credential = try await provider.requestCredential()
 /// }
 /// ```
+///
+/// ## Localisation
+///
+/// The button ships with English and Spanish translations. At runtime it resolves
+/// the visible label in two steps:
+///
+/// 1. **App bundle** (`Bundle.main`) — checked first. Add the key to your app's
+///    `Localizable.xcstrings` (or `.strings` file) to support additional languages
+///    without any changes to this package.
+/// 2. **Module bundle** — fallback. Provides English (`en`) and Spanish (`es`)
+///    out of the box.
+///
+/// The three localisation keys (one per ``ARCGoogleButtonLabel`` case) are the
+/// English strings themselves — see ``ARCGoogleButtonLabel`` for the full table
+/// and an example of how to add a language to your app.
 public struct GoogleSignInButton: View {
     // MARK: - Properties
 
@@ -43,7 +65,7 @@ public struct GoogleSignInButton: View {
                 googleLogoTile
                     .frame(width: 16, height: 16)
 
-                Text("Sign in with Google")
+                Text(verbatim: resolvedTitle)
                     .font(.system(size: 19, weight: .medium))
                     .foregroundStyle(foregroundColor)
             }
@@ -56,6 +78,22 @@ public struct GoogleSignInButton: View {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .strokeBorder(borderColor, lineWidth: 1)
         }
+    }
+
+    // MARK: - Label resolution
+
+    //
+    // Looks up the label key in the app's main bundle first so consumers can
+    // ship additional localisations without forking the package. Falls back to
+    // the module bundle, which ships English and Spanish out of the box.
+
+    private var resolvedTitle: String {
+        let key = label.titleKey
+        let fromMain = Bundle.main.localizedString(forKey: key, value: nil, table: nil)
+        if fromMain != key {
+            return fromMain
+        }
+        return Bundle.module.localizedString(forKey: key, value: key, table: nil)
     }
 
     // MARK: - Colors (Google Identity branding guidelines)

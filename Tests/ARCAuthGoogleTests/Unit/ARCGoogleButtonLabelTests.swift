@@ -5,38 +5,38 @@ import Testing
 
 @Suite("ARCGoogleButtonLabel Tests")
 struct ARCGoogleButtonLabelTests {
-    @Test("Should return 'Sign in with Google' for signIn case", .tags(.unit)) func signInTitle() {
+    @Test("Should return 'Sign in with Google' key for signIn case", .tags(.unit)) func signInTitleKey() {
         // Given / When
         let sut = ARCGoogleButtonLabel.signIn
 
         // Then
-        #expect(sut.title == "Sign in with Google")
+        #expect(sut.titleKey == "Sign in with Google")
     }
 
-    @Test("Should return 'Sign up with Google' for signUp case", .tags(.unit)) func signUpTitle() {
+    @Test("Should return 'Sign up with Google' key for signUp case", .tags(.unit)) func signUpTitleKey() {
         // Given / When
         let sut = ARCGoogleButtonLabel.signUp
 
         // Then
-        #expect(sut.title == "Sign up with Google")
+        #expect(sut.titleKey == "Sign up with Google")
     }
 
-    @Test("Should return 'Continue with Google' for continue case", .tags(.unit)) func continueTitle() {
+    @Test("Should return 'Continue with Google' key for continue case", .tags(.unit)) func continueTitleKey() {
         // Given / When
         let sut = ARCGoogleButtonLabel.continue
 
         // Then
-        #expect(sut.title == "Continue with Google")
+        #expect(sut.titleKey == "Continue with Google")
     }
 
-    @Test("Should have distinct titles for all cases", .tags(.unit)) func allTitlesDistinct() {
+    @Test("Should have distinct title keys for all cases", .tags(.unit)) func allTitleKeysDistinct() {
         // Given
-        let titles = [ARCGoogleButtonLabel.signIn.title,
-                      ARCGoogleButtonLabel.signUp.title,
-                      ARCGoogleButtonLabel.continue.title]
+        let keys = [ARCGoogleButtonLabel.signIn.titleKey,
+                    ARCGoogleButtonLabel.signUp.titleKey,
+                    ARCGoogleButtonLabel.continue.titleKey]
 
         // When / Then
-        #expect(Set(titles).count == 3)
+        #expect(Set(keys).count == 3)
     }
 
     @Test("Should be Sendable", .tags(.unit)) func isSendable() {

@@ -11,6 +11,15 @@ import Foundation
 /// )
 /// let provider = GoogleCredentialProvider(configuration: config)
 /// ```
+///
+/// ## Note on GIDSignIn configuration
+///
+/// ``GoogleCredentialProvider`` applies this configuration to
+/// `GIDSignIn.sharedInstance.configuration` on every sign-in call.
+/// If your app needs additional properties on the shared instance (e.g.
+/// `serverClientID` for Firebase backend OAuth), set them after
+/// ``GoogleCredentialProvider/requestCredential()`` returns, or manage
+/// `GIDSignIn.sharedInstance` directly alongside this provider.
 public struct GoogleConfiguration: Sendable {
     /// The OAuth 2.0 client ID from Google Cloud Console.
     public let clientID: String

@@ -6,12 +6,17 @@ import SwiftUI
 ///
 /// Mirrors `SignInWithAppleButton.Label` without exposing
 /// `AuthenticationServices` to callers.
+///
+/// ## Localisation
+///
+/// No action needed. `AuthenticationServices` translates the button text
+/// automatically into the device language across all iOS-supported locales.
 public enum ARCAppleButtonLabel: Sendable {
-    /// "Sign in with Apple"
+    /// "Sign in with Apple" (localised automatically by the system).
     case signIn
-    /// "Sign up with Apple"
+    /// "Sign up with Apple" (localised automatically by the system).
     case signUp
-    /// "Continue with Apple"
+    /// "Continue with Apple" (localised automatically by the system).
     case `continue`
 
     // MARK: - Internal

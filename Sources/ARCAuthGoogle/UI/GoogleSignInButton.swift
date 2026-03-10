@@ -7,15 +7,37 @@ import SwiftUI
 /// Loads the official Google "G" logo from the GoogleSignIn resource bundle at runtime.
 /// Falls back to a styled placeholder if the bundle is unavailable.
 ///
-/// **Layout spec (iOS):** 16pt leading padding · G logo · 12pt gap · centered text · 16pt trailing padding.
+/// Logo and label are centered together as a unit, matching the visual rhythm of
+/// ``AppleSignInButton``. Colours adapt automatically to light and dark mode.
 ///
 /// ## Usage
+///
 /// ```swift
+/// // Default — "Sign in with Google"
 /// GoogleSignInButton {
 ///     let credential = try await provider.requestCredential()
-///     // Send credential to backend...
+/// }
+///
+/// // Sign-up variant
+/// GoogleSignInButton(label: .signUp) {
+///     let credential = try await provider.requestCredential()
 /// }
 /// ```
+///
+/// ## Localisation
+///
+/// The button ships with English and Spanish translations. At runtime it resolves
+/// the visible label in two steps:
+///
+/// 1. **App bundle** (`Bundle.main`) — checked first. Add the key to your app's
+///    `Localizable.xcstrings` (or `.strings` file) to support additional languages
+///    without any changes to this package.
+/// 2. **Module bundle** — fallback. Provides English (`en`) and Spanish (`es`)
+///    out of the box.
+///
+/// The three localisation keys (one per ``ARCGoogleButtonLabel`` case) are the
+/// English strings themselves — see ``ARCGoogleButtonLabel`` for the full table
+/// and an example of how to add a language to your app.
 public struct GoogleSignInButton: View {
     // MARK: - Properties
 
@@ -41,27 +63,37 @@ public struct GoogleSignInButton: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 googleLogoTile
-                    .frame(width: 20, height: 20)
+                    .frame(width: 16, height: 16)
 
-                Text(label.title)
-                    .font(.system(size: 16, weight: .medium))
+                Text(verbatim: resolvedTitle)
+                    .font(.system(size: 19, weight: .medium))
                     .foregroundStyle(foregroundColor)
-                    .frame(maxWidth: .infinity)
-
-                // Mirrors logo width so text is visually centered in the full button
-                Color.clear
-                    .frame(width: 20, height: 20)
             }
-            .padding(.horizontal, 16)
             .frame(maxWidth: .infinity)
             .frame(height: 50)
         }
         .background(backgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 25, style: .continuous)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .strokeBorder(borderColor, lineWidth: 1)
         }
+    }
+
+    // MARK: - Label resolution
+
+    //
+    // Looks up the label key in the app's main bundle first so consumers can
+    // ship additional localisations without forking the package. Falls back to
+    // the module bundle, which ships English and Spanish out of the box.
+
+    private var resolvedTitle: String {
+        let key = label.titleKey
+        let fromMain = Bundle.main.localizedString(forKey: key, value: nil, table: nil)
+        if fromMain != key {
+            return fromMain
+        }
+        return Bundle.module.localizedString(forKey: key, value: key, table: nil)
     }
 
     // MARK: - Colors (Google Identity branding guidelines)
@@ -91,28 +123,15 @@ public struct GoogleSignInButton: View {
 
     // MARK: - Logo
 
-    //
-    // Google guidelines: the "G" logo must always appear on a white background.
-    // Light mode: button background is already white — no separate tile needed.
-    // Dark mode: white rounded-rect tile placed behind the logo.
-
-    private var googleLogoTile: some View {
-        ZStack {
-            if colorScheme == .dark {
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.white)
-                    .frame(width: 24, height: 24)
-            }
-
-            if let uiImage = loadGoogleLogo() {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFit()
-            } else {
-                Text("G")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(Color(red: 0.259, green: 0.522, blue: 0.957))
-            }
+    @ViewBuilder private var googleLogoTile: some View {
+        if let uiImage = loadGoogleLogo() {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFit()
+        } else {
+            Text("G")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Color(red: 0.259, green: 0.522, blue: 0.957))
         }
     }
 

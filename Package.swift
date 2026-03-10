@@ -3,6 +3,7 @@
 import PackageDescription
 
 let package = Package(name: "ARCAuthentication",
+                      defaultLocalization: "en",
                       platforms: [.iOS(.v17),
                                   .macOS(.v14)],
                       products: [.library(name: "ARCAuthentication",
@@ -22,7 +23,8 @@ let package = Package(name: "ARCAuthentication",
 
                           .target(name: "ARCAuthGoogle",
                                   dependencies: ["ARCAuthentication",
-                                                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS")]),
+                                                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS")],
+                                  resources: [.process("Resources")]),
                           .testTarget(name: "ARCAuthGoogleTests",
                                       dependencies: ["ARCAuthGoogle"])],
                       swiftLanguageModes: [.v6])

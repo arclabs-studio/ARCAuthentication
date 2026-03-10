@@ -41,7 +41,7 @@ public struct GoogleSignInButton: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 googleLogoTile
-                    .frame(width: 20, height: 20)
+                    .frame(width: 16, height: 16)
 
                 Text("Sign in with Google")
                     .font(.system(size: 19, weight: .medium))

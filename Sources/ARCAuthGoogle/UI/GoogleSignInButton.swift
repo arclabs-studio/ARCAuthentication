@@ -19,6 +19,7 @@ import SwiftUI
 public struct GoogleSignInButton: View {
     // MARK: - Properties
 
+    private let label: ARCGoogleButtonLabel
     private let action: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
@@ -26,8 +27,11 @@ public struct GoogleSignInButton: View {
     // MARK: - Initialization
 
     /// Creates a Google Sign-In button.
-    /// - Parameter action: Closure executed when the button is tapped.
-    public init(action: @escaping () -> Void) {
+    /// - Parameters:
+    ///   - label: The text variant to display. Defaults to `.signIn`.
+    ///   - action: Closure executed when the button is tapped.
+    public init(label: ARCGoogleButtonLabel = .signIn, action: @escaping () -> Void) {
+        self.label = label
         self.action = action
     }
 
@@ -39,8 +43,8 @@ public struct GoogleSignInButton: View {
                 googleLogoTile
                     .frame(width: 20, height: 20)
 
-                Text("Sign in with Google")
-                    .font(.system(size: 14, weight: .medium))
+                Text(label.title)
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(foregroundColor)
                     .frame(maxWidth: .infinity)
 
@@ -50,12 +54,12 @@ public struct GoogleSignInButton: View {
             }
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity)
-            .frame(height: 44)
+            .frame(height: 50)
         }
         .background(backgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 4, style: .continuous)
+            RoundedRectangle(cornerRadius: 25, style: .continuous)
                 .strokeBorder(borderColor, lineWidth: 1)
         }
     }
@@ -129,7 +133,9 @@ public struct GoogleSignInButton: View {
 
 #Preview("Google Button - Light") {
     VStack(spacing: 20) {
-        GoogleSignInButton {}
+        GoogleSignInButton(label: .signIn) {}
+        GoogleSignInButton(label: .signUp) {}
+        GoogleSignInButton(label: .continue) {}
     }
     .padding()
     .preferredColorScheme(.light)
@@ -137,7 +143,9 @@ public struct GoogleSignInButton: View {
 
 #Preview("Google Button - Dark") {
     VStack(spacing: 20) {
-        GoogleSignInButton {}
+        GoogleSignInButton(label: .signIn) {}
+        GoogleSignInButton(label: .signUp) {}
+        GoogleSignInButton(label: .continue) {}
     }
     .padding()
     .background(.black)

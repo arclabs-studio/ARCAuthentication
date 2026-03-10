@@ -91,28 +91,15 @@ public struct GoogleSignInButton: View {
 
     // MARK: - Logo
 
-    //
-    // Google guidelines: the "G" logo must always appear on a white background.
-    // Light mode: button background is already white — no separate tile needed.
-    // Dark mode: white rounded-rect tile placed behind the logo.
-
-    private var googleLogoTile: some View {
-        ZStack {
-            if colorScheme == .dark {
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.white)
-                    .frame(width: 24, height: 24)
-            }
-
-            if let uiImage = loadGoogleLogo() {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFit()
-            } else {
-                Text("G")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(Color(red: 0.259, green: 0.522, blue: 0.957))
-            }
+    @ViewBuilder private var googleLogoTile: some View {
+        if let uiImage = loadGoogleLogo() {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFit()
+        } else {
+            Text("G")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Color(red: 0.259, green: 0.522, blue: 0.957))
         }
     }
 

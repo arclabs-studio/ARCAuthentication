@@ -96,7 +96,9 @@ struct LoginView: View {
 
             VStack(spacing: 16) {
                 AppleSignInButton(action: onAppleSignIn)
-                GoogleSignInButton(action: onGoogleSignIn)
+                GoogleSignInButton(label: .signIn, action: onGoogleSignIn)
+                GoogleSignInButton(label: .signUp, action: onGoogleSignIn)
+                GoogleSignInButton(label: .continue, action: onGoogleSignIn)
             }
             .padding(.horizontal, 32)
 

@@ -7,7 +7,7 @@ import SwiftUI
 /// Loads the official Google "G" logo from the GoogleSignIn resource bundle at runtime.
 /// Falls back to a styled placeholder if the bundle is unavailable.
 ///
-/// **Layout spec (iOS):** 16pt leading padding · G logo · 12pt gap · centered text · 16pt trailing padding.
+/// Logo and label are centered together as a unit, matching the visual rhythm of `AppleSignInButton`.
 ///
 /// ## Usage
 /// ```swift
@@ -46,13 +46,7 @@ public struct GoogleSignInButton: View {
                 Text(label.title)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(foregroundColor)
-                    .frame(maxWidth: .infinity)
-
-                // Mirrors logo width so text is visually centered in the full button
-                Color.clear
-                    .frame(width: 20, height: 20)
             }
-            .padding(.horizontal, 16)
             .frame(maxWidth: .infinity)
             .frame(height: 50)
         }

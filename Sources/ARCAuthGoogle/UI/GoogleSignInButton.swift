@@ -43,8 +43,8 @@ public struct GoogleSignInButton: View {
                 googleLogoTile
                     .frame(width: 20, height: 20)
 
-                Text(label.title)
-                    .font(.system(size: 16, weight: .medium))
+                Text("Sign in with Google")
+                    .font(.system(size: 19, weight: .medium))
                     .foregroundStyle(foregroundColor)
             }
             .frame(maxWidth: .infinity)

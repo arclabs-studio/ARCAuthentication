@@ -14,6 +14,16 @@ import UIKit
 /// let provider = GoogleCredentialProvider(configuration: config)
 /// let credential = try await provider.requestCredential()
 /// ```
+///
+/// ## GIDSignIn Shared Instance
+///
+/// Each call to ``requestCredential()`` sets `GIDSignIn.sharedInstance.configuration`
+/// with the ``GoogleConfiguration`` provided at initialisation. This is intentional
+/// and follows the standard GoogleSignIn SDK integration pattern.
+///
+/// If your app configures `GIDSignIn.sharedInstance` independently (e.g. to set a
+/// `serverClientID` for Firebase backend token exchange), set those properties **after**
+/// calling ``requestCredential()``, or subclass / wrap this provider to preserve them.
 @MainActor
 public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sendable {
     // MARK: - Properties

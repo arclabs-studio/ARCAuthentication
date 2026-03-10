@@ -9,15 +9,27 @@ import SwiftUI
 /// current color scheme — no manual dark/light detection needed.
 ///
 /// ## Usage
+///
 /// ```swift
 /// // Adaptive — recommended
 /// AppleSignInButton {
 ///     let credential = try await provider.requestCredential()
 /// }
 ///
+/// // Sign-up variant
+/// AppleSignInButton(type: .signUp) {
+///     let credential = try await provider.requestCredential()
+/// }
+///
 /// // Fixed style
 /// AppleSignInButton(style: .whiteOutline) { ... }
 /// ```
+///
+/// ## Localisation
+///
+/// Localisation is handled automatically by `AuthenticationServices`. The button
+/// renders in the device language across all iOS-supported locales (~40+ languages)
+/// with no additional setup required in your app.
 public struct AppleSignInButton: View {
     // MARK: - Properties
 

@@ -72,10 +72,11 @@ public struct GoogleSignInButton: View {
             .frame(maxWidth: .infinity)
             .frame(height: 50)
         }
+        .buttonStyle(.plain)
         .background(backgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .strokeBorder(borderColor, lineWidth: 1)
         }
     }

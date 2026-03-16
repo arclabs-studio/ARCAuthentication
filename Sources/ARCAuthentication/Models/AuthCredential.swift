@@ -15,7 +15,7 @@ import Foundation
 ///     print(google.idToken)
 /// }
 /// ```
-public enum AuthCredential: Sendable, Equatable {
+public enum AuthCredential: Sendable, Equatable, Codable {
     /// Credential from Sign in with Apple.
     case apple(AppleCredential)
 
@@ -30,7 +30,7 @@ public enum AuthCredential: Sendable, Equatable {
 ///
 /// - Note: `fullName` and `email` are only provided on the **first** sign-in.
 ///   Store them immediately if needed.
-public struct AppleCredential: Sendable, Equatable {
+public struct AppleCredential: Sendable, Equatable, Codable {
     /// The JSON Web Token used for identity verification.
     public let identityToken: Data
 
@@ -89,7 +89,7 @@ public struct AppleCredential: Sendable, Equatable {
 ///
 /// Contains the ID token, access token, and optional user profile
 /// information returned by `GIDGoogleUser`.
-public struct GoogleCredential: Sendable, Equatable {
+public struct GoogleCredential: Sendable, Equatable, Codable {
     /// The OpenID Connect ID token for identity verification.
     public let idToken: String
 

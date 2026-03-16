@@ -24,6 +24,8 @@ xcuserdata/
 *secret*
 *password*
 *credentials*
+# Excepción: archivos Swift en Sources/ no son secretos aunque contengan "credentials" en el nombre
+!Sources/**/*.swift
 *.mobileprovision
 # Archivos de configuración local
 .claude-code/

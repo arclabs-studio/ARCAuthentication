@@ -11,13 +11,16 @@ let package = Package(name: "ARCAuthentication",
                                  .library(name: "ARCAuthGoogle",
                                           targets: ["ARCAuthGoogle"])],
                       dependencies: [.package(url: "https://github.com/google/GoogleSignIn-iOS.git",
-                                              from: "8.0.0")],
+                                              from: "8.0.0"),
+                                     .package(url: "https://github.com/arclabs-studio/ARCStorage.git",
+                                              from: "1.0.0")],
                       targets: [// MARK: - Core (Credential Providers)
 
                           .target(name: "ARCAuthentication",
-                                  dependencies: []),
+                                  dependencies: [.product(name: "ARCStorage", package: "ARCStorage")]),
                           .testTarget(name: "ARCAuthenticationTests",
-                                      dependencies: ["ARCAuthentication"]),
+                                      dependencies: ["ARCAuthentication",
+                                                     .product(name: "ARCStorage", package: "ARCStorage")]),
 
                           // MARK: - Google (Google Sign-In)
 
@@ -26,5 +29,6 @@ let package = Package(name: "ARCAuthentication",
                                                  .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS")],
                                   resources: [.process("Resources")]),
                           .testTarget(name: "ARCAuthGoogleTests",
-                                      dependencies: ["ARCAuthGoogle"])],
+                                      dependencies: ["ARCAuthGoogle"])
+                      ],
                       swiftLanguageModes: [.v6])

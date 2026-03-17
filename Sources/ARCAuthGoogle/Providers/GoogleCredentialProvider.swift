@@ -102,4 +102,27 @@ public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sen
         return viewController
     }
 }
+
+// MARK: - SessionManaging
+
+extension GoogleCredentialProvider: SessionManaging {
+    /// Cierra la sesión de Google del usuario actual.
+    ///
+    /// Llama a `GIDSignIn.sharedInstance.signOut()`, que invalida la sesión en memoria
+    /// del SDK de Google Sign-In. El usuario deberá completar el flujo de sign-in
+    /// completo en la próxima llamada a `requestCredential()`.
+    public func signOut() {
+        GIDSignIn.sharedInstance.signOut()
+    }
+
+    /// Comprueba si hay una sesión de Google activa en el SDK.
+    ///
+    /// Devuelve ``CredentialState/authorized`` si `GIDSignIn.sharedInstance.currentUser`
+    /// no es `nil`, lo que indica que el SDK tiene una sesión en memoria o restaurada.
+    ///
+    /// - Returns: ``CredentialState/authorized`` si hay sesión activa, ``CredentialState/notFound`` si no.
+    public func checkCredentialState() async -> CredentialState {
+        GIDSignIn.sharedInstance.currentUser != nil ? .authorized : .notFound
+    }
+}
 #endif

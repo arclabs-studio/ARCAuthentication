@@ -281,6 +281,72 @@ await signIn(with: appleProvider)
 await signIn(with: googleProvider)
 ```
 
+## Shared Keychain SSO
+
+ARCAuthentication incluye `KeychainAuthStorage`, un almacén seguro que permite guardar y
+recuperar la `AuthCredential` del usuario entre sesiones. Usando un Keychain Access Group
+compartido, FavRes, FavBook, FavPrint y cualquier otra app del mismo Team ID pueden compartir
+la sesión sin necesidad de backend propio.
+
+### Qué es el Keychain Access Group
+
+Un Keychain Access Group es un identificador que permite a varias apps del mismo Team ID Apple
+leer y escribir en los mismos ítems del Keychain del dispositivo. Una vez que el usuario inicia
+sesión en cualquiera de tus apps, el resto pueden recuperar su credencial directamente.
+
+### Configuración en Xcode
+
+Cada app que participe en el SSO debe activar la capability **Keychain Sharing**:
+
+1. En Xcode, selecciona el target de la app
+2. Ve a **Signing & Capabilities** → **+ Capability** → **Keychain Sharing**
+3. Añade el mismo grupo en todas las apps: `$(TeamID).com.arclabs.shared`
+
+> **Important:** Sustituye `$(TeamID)` por el Team ID real de tu cuenta de desarrollador Apple.
+> Puedes encontrarlo en [developer.apple.com](https://developer.apple.com) bajo Membership.
+
+### Uso
+
+```swift
+import ARCAuthentication
+
+// Almacenamiento local (una sola app)
+let storage = KeychainAuthStorage()
+
+// Almacenamiento compartido entre apps Fav*
+let sharedStorage = KeychainAuthStorage(accessGroup: AuthConstants.Keychain.sharedAccessGroup)
+
+// Guardar tras un sign-in exitoso
+let credential = try await appleProvider.requestCredential()
+try await sharedStorage.save(credential)
+
+// Recuperar en el arranque de cualquier app del grupo
+if let saved = try await sharedStorage.load() {
+    // El usuario ya tiene sesión — no mostrar pantalla de login
+}
+
+// Cerrar sesión
+try await sharedStorage.delete()
+appleProvider.signOut()  // o googleProvider.signOut()
+```
+
+### Verificar el estado de la sesión
+
+Los providers también implementan `SessionManaging`, lo que permite comprobar el estado
+de la sesión sin necesidad de haber guardado la credencial manualmente:
+
+```swift
+let state = await appleProvider.checkCredentialState()
+switch state {
+case .authorized:
+    print("Sesión activa")
+case .notFound:
+    print("Sin sesión — mostrar login")
+case .revoked:
+    print("Acceso revocado — limpiar datos locales")
+}
+```
+
 ## Important Notes
 
 ### Apple: Email and Name

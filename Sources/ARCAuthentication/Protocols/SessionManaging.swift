@@ -24,6 +24,7 @@
 /// // Cerrar sesión
 /// provider.signOut()
 /// ```
+@MainActor
 public protocol SessionManaging: Sendable {
     /// Cierra la sesión activa del usuario para este proveedor.
     ///

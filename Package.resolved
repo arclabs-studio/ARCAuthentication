@@ -1,5 +1,5 @@
 {
-  "originHash" : "5bfc7b904a7a36e3aba238427488244628cf1c33c6da792318468fa888502f1c",
+  "originHash" : "f78fe74df3f96ed7c25c5614f24ceece7f6c97c282ed06518b121929620e5e32",
   "pins" : [
     {
       "identity" : "app-check",
@@ -17,6 +17,24 @@
       "state" : {
         "revision" : "2781038865a80e2c425a1da12cc1327bcd56501f",
         "version" : "1.7.6"
+      }
+    },
+    {
+      "identity" : "arclogger",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/arclabs-studio/ARCLogger",
+      "state" : {
+        "revision" : "c6fcb3571628d315e9fc7c00f28c12ac99fe42ca",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "arcstorage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/arclabs-studio/ARCStorage.git",
+      "state" : {
+        "revision" : "738f5062b154838c19a002f21f25f299820768e5",
+        "version" : "1.3.0"
       }
     },
     {

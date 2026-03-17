@@ -43,4 +43,30 @@ struct GoogleCredentialProviderTests {
         #expect(sut.providerType == .google)
     }
     #endif
+
+    // MARK: - SessionManaging
+
+    #if canImport(UIKit)
+    @Test("signOut() no lanza error", .tags(.unit))
+    @MainActor func signOutDoesNotThrow() {
+        // Given
+        let sut = GoogleCredentialProvider(configuration: GoogleConfiguration(clientID: "test-id"))
+
+        // When / Then — no debe lanzar ni crashear
+        sut.signOut()
+    }
+
+    @Test("checkCredentialState() devuelve .notFound cuando no hay sesión activa", .tags(.unit))
+    @MainActor func checkCredentialStateReturnsNotFoundWithoutSession() async {
+        // Given — sin sign-in previo, GIDSignIn.sharedInstance.currentUser es nil
+        let sut = GoogleCredentialProvider(configuration: GoogleConfiguration(clientID: "test-id"))
+        sut.signOut() // garantizar sesión limpia
+
+        // When
+        let state = await sut.checkCredentialState()
+
+        // Then
+        #expect(state == .notFound)
+    }
+    #endif
 }

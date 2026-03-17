@@ -56,6 +56,9 @@ public final class AppleCredentialProvider: NSObject, CredentialProviding, @unch
     private let scopes: [ASAuthorization.Scope]
     private var authContinuation: CheckedContinuation<AuthCredential, Error>?
     private var currentNonce: String?
+    /// Identificador del último usuario que completó el flujo de sign-in.
+    /// Protegido por @MainActor. Se usa en `checkCredentialState()`.
+    private var lastUserIdentifier: String?
 
     // MARK: - Initialization
 
@@ -130,6 +133,7 @@ extension AppleCredentialProvider: ASAuthorizationControllerDelegate {
                                              email: appleCredential.email,
                                              userIdentifier: appleCredential.user)
 
+            lastUserIdentifier = appleCredential.user
             authContinuation?.resume(returning: .apple(credential))
             authContinuation = nil
             currentNonce = nil
@@ -156,6 +160,49 @@ extension AppleCredentialProvider: ASAuthorizationControllerPresentationContextP
             // The UIWindow() fallback is unreachable in a running foreground iOS 17+ app; it
             // satisfies the non-optional return type required by ASAuthorizationControllerPresentationContextProviding.
             UIApplication.shared.arcKeyWindow ?? UIWindow()
+        }
+    }
+}
+
+// MARK: - SessionManaging
+
+extension AppleCredentialProvider: SessionManaging {
+    /// Limpia el estado de sesión en memoria del provider.
+    ///
+    /// Sign in with Apple no ofrece una llamada de cierre de sesión en el SDK del cliente.
+    /// Para revocar el acceso completamente, el backend debe llamar a la API de revocación de Apple.
+    /// Este método limpia el `userIdentifier` en memoria para que `checkCredentialState()`
+    /// devuelva `.notFound` hasta el próximo sign-in exitoso.
+    public func signOut() {
+        lastUserIdentifier = nil
+    }
+
+    /// Comprueba el estado de la credencial del último usuario que inició sesión.
+    ///
+    /// Si no hay ningún `userIdentifier` en memoria (primera ejecución o tras `signOut()`),
+    /// devuelve `.notFound` sin consultar a Apple. Si hay un identificador disponible, consulta
+    /// `ASAuthorizationAppleIDProvider` para verificar el estado actual.
+    ///
+    /// - Returns: ``CredentialState/authorized``, ``CredentialState/notFound``,
+    ///   o ``CredentialState/revoked``.
+    public func checkCredentialState() async -> CredentialState {
+        guard let userID = lastUserIdentifier else {
+            return .notFound
+        }
+
+        return await withCheckedContinuation { continuation in
+            ASAuthorizationAppleIDProvider().getCredentialState(forUserID: userID) { state, _ in
+                switch state {
+                case .authorized:
+                    continuation.resume(returning: .authorized)
+                case .revoked:
+                    continuation.resume(returning: .revoked)
+                case .notFound, .transferred:
+                    continuation.resume(returning: .notFound)
+                @unknown default:
+                    continuation.resume(returning: .notFound)
+                }
+            }
         }
     }
 }

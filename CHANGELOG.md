@@ -9,11 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `AuthConstants.Keychain.sharedAccessGroup` — constante del Keychain Access Group compartido entre apps ARC Labs Studio (FavRes, FavBook, FavPrint y futuras apps Fav*)
+- `KeychainAuthStorage` — almacén seguro de `AuthCredential` en el Keychain con soporte de Keychain Access Group para SSO entre apps; incluye `init()` y `init(accessGroup:)`
+- `CredentialState` enum con casos `.authorized`, `.notFound`, `.revoked`
+- `SessionManaging` protocol con `signOut()` y `checkCredentialState() async -> CredentialState`
+- `AppleCredentialProvider` conforma a `SessionManaging`: `signOut()` limpia el estado en memoria, `checkCredentialState()` consulta `ASAuthorizationAppleIDProvider`
+- `GoogleCredentialProvider` conforma a `SessionManaging`: `signOut()` llama a `GIDSignIn.sharedInstance.signOut()`, `checkCredentialState()` comprueba `GIDSignIn.sharedInstance.currentUser`
+- Dependencia `ARCStorage` para `KeychainAuthStorage`
+- Sección "Shared Keychain SSO" en la guía de inicio de DocC
 - `ARCAppleButtonLabel` enum wrapping `SignInWithAppleButton.Label` cases (`.signIn`, `.signUp`, `.continue`) — callers no longer need to `import AuthenticationServices` to use `AppleSignInButton`
 - Google Sign-In to the demo app alongside Sign in with Apple
 - Demo app README with full Google Sign-In configuration guide
 - Comprehensive documentation for Google Sign-In setup in DocC Getting Started guide
 - URL scheme and `onOpenURL` handler in demo app for Google OAuth callback
+
+### Changed
+
+- `AuthCredential`, `AppleCredential`, `GoogleCredential` conforman ahora a `Codable` (cambio aditivo, sin breaking changes en la API existente)
 
 ## [2.0.0] - 2026-02-27
 

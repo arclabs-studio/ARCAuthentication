@@ -1,7 +1,6 @@
 import Testing
 @testable import ARCAuthentication
 
-@Suite("AuthenticationState Tests")
 struct AuthenticationStateTests {
     @Test("Should represent unauthenticated state", .tags(.unit)) func unauthenticated() {
         // Given / When

@@ -3,7 +3,8 @@ import Testing
 
 /// Los tests de Keychain acceden al mismo slot externo (servicio "com.arclabs.arcauthentication" / "current").
 /// .serialized garantiza ejecución secuencial para evitar errSecDuplicateItem (-25299).
-@Suite("KeychainAuthStorage Tests", .serialized) struct KeychainAuthStorageTests {
+@Suite(.serialized)
+struct KeychainAuthStorageTests {
     // MARK: - Initialization
 
     @Test("Debe crear un almacén con accessGroup sin lanzar errores", .tags(.unit))

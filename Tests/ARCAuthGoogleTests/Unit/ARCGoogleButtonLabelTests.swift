@@ -3,7 +3,6 @@ import SwiftUI
 import Testing
 @testable import ARCAuthGoogle
 
-@Suite("ARCGoogleButtonLabel Tests")
 struct ARCGoogleButtonLabelTests {
     @Test("Should return 'Sign in with Google' key for signIn case", .tags(.unit)) func signInTitleKey() {
         // Given / When

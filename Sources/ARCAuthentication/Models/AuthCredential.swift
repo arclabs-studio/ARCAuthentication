@@ -99,6 +99,12 @@ public struct GoogleCredential: Sendable, Equatable, Codable {
     /// The user's display name, if available.
     public let displayName: String?
 
+    /// The user's given (first) name, if available.
+    public let givenName: String?
+
+    /// The user's family (last) name, if available.
+    public let familyName: String?
+
     /// The user's email address, if available.
     public let email: String?
 
@@ -109,17 +115,23 @@ public struct GoogleCredential: Sendable, Equatable, Codable {
     /// - Parameters:
     ///   - idToken: The OIDC ID token string.
     ///   - accessToken: The OAuth access token string.
-    ///   - displayName: Optional display name.
+    ///   - displayName: Optional full display name.
+    ///   - givenName: Optional given (first) name.
+    ///   - familyName: Optional family (last) name.
     ///   - email: Optional email address.
     ///   - photoURL: Optional profile photo URL.
     public init(idToken: String,
                 accessToken: String,
                 displayName: String? = nil,
+                givenName: String? = nil,
+                familyName: String? = nil,
                 email: String? = nil,
                 photoURL: URL? = nil) {
         self.idToken = idToken
         self.accessToken = accessToken
         self.displayName = displayName
+        self.givenName = givenName
+        self.familyName = familyName
         self.email = email
         self.photoURL = photoURL
     }
@@ -128,6 +140,8 @@ public struct GoogleCredential: Sendable, Equatable, Codable {
     public static let mock = GoogleCredential(idToken: "mock-google-id-token",
                                               accessToken: "mock-google-access-token",
                                               displayName: "John Doe",
+                                              givenName: "John",
+                                              familyName: "Doe",
                                               email: "john@gmail.com",
                                               photoURL: URL(string: "https://example.com/photo.jpg"))
 }

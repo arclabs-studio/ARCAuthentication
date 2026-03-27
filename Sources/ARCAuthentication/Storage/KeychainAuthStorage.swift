@@ -6,7 +6,7 @@ import ARCStorage
 ///
 /// Almacena una única credencial de autenticación con un identificador fijo ("current"),
 /// de modo que cada instancia de `KeychainAuthStorage` mantiene exactamente un registro.
-private struct AuthCredentialRecord: Codable, Sendable, Identifiable {
+private struct AuthCredentialRecord: Codable, Identifiable {
     /// Identificador fijo del registro único por instancia de almacén.
     let id: String
     /// La credencial de autenticación serializada.

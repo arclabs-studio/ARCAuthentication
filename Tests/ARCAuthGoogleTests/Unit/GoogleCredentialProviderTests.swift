@@ -2,7 +2,6 @@ import Testing
 @testable import ARCAuthentication
 @testable import ARCAuthGoogle
 
-@Suite("GoogleCredentialProvider Tests")
 struct GoogleCredentialProviderTests {
     // MARK: - GoogleConfiguration
 

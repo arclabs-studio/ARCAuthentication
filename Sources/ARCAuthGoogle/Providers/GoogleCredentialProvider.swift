@@ -72,6 +72,8 @@ public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sen
         let credential = GoogleCredential(idToken: idToken,
                                           accessToken: user.accessToken.tokenString,
                                           displayName: user.profile?.name,
+                                          givenName: user.profile?.givenName,
+                                          familyName: user.profile?.familyName,
                                           email: user.profile?.email,
                                           photoURL: user.profile?.imageURL(withDimension: 200))
 

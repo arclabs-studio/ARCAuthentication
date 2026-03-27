@@ -4,7 +4,6 @@ import SwiftUI
 import Testing
 @testable import ARCAuthentication
 
-@Suite("ARCAppleButtonLabel Tests")
 struct ARCAppleButtonLabelTests {
     @Test("Should expose signIn case", .tags(.unit)) func signInCaseExists() {
         // Given / When

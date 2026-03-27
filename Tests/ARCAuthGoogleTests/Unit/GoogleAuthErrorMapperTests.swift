@@ -4,7 +4,6 @@ import Testing
 @testable import ARCAuthGoogle
 
 #if canImport(UIKit)
-@Suite("GoogleAuthErrorMapper Tests")
 struct GoogleAuthErrorMapperTests {
     @Test("Should map canceled error to userCancelled", .tags(.unit)) func mapCanceledError() {
         // Given

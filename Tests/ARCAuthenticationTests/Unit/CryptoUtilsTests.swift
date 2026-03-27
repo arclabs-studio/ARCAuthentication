@@ -2,7 +2,6 @@ import Foundation
 import Testing
 @testable import ARCAuthentication
 
-@Suite("CryptoUtils Tests")
 struct CryptoUtilsTests {
     // MARK: - Nonce Generation
 

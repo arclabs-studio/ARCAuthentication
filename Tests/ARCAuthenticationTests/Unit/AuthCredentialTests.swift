@@ -2,7 +2,6 @@ import Foundation
 import Testing
 @testable import ARCAuthentication
 
-@Suite("AuthCredential Tests")
 struct AuthCredentialTests {
     // MARK: - AppleCredential
 

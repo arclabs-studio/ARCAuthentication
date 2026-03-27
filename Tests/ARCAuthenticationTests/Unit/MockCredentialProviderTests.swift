@@ -1,7 +1,6 @@
 import Testing
 @testable import ARCAuthentication
 
-@Suite("MockCredentialProvider Tests")
 struct MockCredentialProviderTests {
     // MARK: - Success
 

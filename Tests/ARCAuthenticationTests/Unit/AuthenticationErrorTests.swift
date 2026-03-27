@@ -2,7 +2,6 @@ import Foundation
 import Testing
 @testable import ARCAuthentication
 
-@Suite("AuthenticationError Tests")
 struct AuthenticationErrorTests {
     // MARK: - Error Descriptions
 

@@ -115,7 +115,7 @@ public struct GoogleCredential: Sendable, Equatable, Codable {
     /// - Parameters:
     ///   - idToken: The OIDC ID token string.
     ///   - accessToken: The OAuth access token string.
-    ///   - displayName: Optional full display name.
+    ///   - displayName: Optional display name.
     ///   - givenName: Optional given (first) name.
     ///   - familyName: Optional family (last) name.
     ///   - email: Optional email address.

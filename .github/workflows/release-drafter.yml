@@ -9,10 +9,8 @@ on:
   push:
     branches:
       - main
-  pull_request_target:
-    branches:
-      - main
-    types: [opened, reopened, synchronize, edited]
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 permissions:
   contents: read

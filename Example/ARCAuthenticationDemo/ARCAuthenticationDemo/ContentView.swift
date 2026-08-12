@@ -51,7 +51,9 @@ struct ContentView: View {
                 credential = try await provider.requestCredential()
                 errorMessage = nil
             } catch let error as AuthenticationError {
-                if case .userCancelled = error { return }
+                if case .userCancelled = error {
+                    return
+                }
                 errorMessage = error.localizedDescription
             } catch {
                 errorMessage = error.localizedDescription

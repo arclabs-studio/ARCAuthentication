@@ -77,6 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive test suite with mocks
 - DocC documentation
 
-[Unreleased]: https://github.com/arclabs-studio/ARCAuthentication/compare/2.0.0...HEAD
-[2.0.0]: https://github.com/arclabs-studio/ARCAuthentication/compare/1.0.0...2.0.0
-[1.0.0]: https://github.com/arclabs-studio/ARCAuthentication/releases/tag/1.0.0
+[Unreleased]: https://github.com/arclabs-studio/ARCAuthentication/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/arclabs-studio/ARCAuthentication/releases/tag/v1.0.0
+
+<!-- 2.0.0 has no published git tag yet; restore the link once v2.0.0 is tagged. -->
+<!-- [2.0.0]: https://github.com/arclabs-studio/ARCAuthentication/compare/v1.0.0...v2.0.0 -->

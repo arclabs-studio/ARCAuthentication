@@ -1,108 +1,369 @@
 # Getting Started
 
-Aprende a integrar ARCAuthentication en tu app.
+Integrate ARCAuthentication into your app to obtain authentication credentials.
 
 ## Overview
 
-Esta guía te muestra cómo configurar Sign in with Apple en tu aplicación iOS usando ARCAuthentication.
+This guide shows how to add Sign in with Apple and Google Sign-In to your iOS app using ARCAuthentication. Both providers conform to ``CredentialProviding``, so you can write shared sign-in logic once.
 
-## Requisitos Previos
+## Prerequisites
 
-1. Una cuenta de desarrollador de Apple
-2. Sign in with Apple habilitado en tu App ID
-3. El capability "Sign in with Apple" añadido a tu target en Xcode
+- An Apple Developer account
+- Sign in with Apple enabled on your App ID (for Apple authentication)
+- A Google Cloud Console project with an iOS OAuth client ID (for Google authentication)
+- The "Sign in with Apple" capability added to your target in Xcode
 
-## Instalación
+## Installation
 
-Añade ARCAuthentication a tu `Package.swift`:
+Add ARCAuthentication to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/arclabs-studio/ARCAuthentication.git", from: "1.0.0")
+    .package(url: "https://github.com/arclabs-studio/ARCAuthentication.git", from: "2.0.0")
 ]
 ```
 
-## Configuración
+Then add the targets you need:
 
-### Paso 1: Crear el AuthenticationManager
+```swift
+.target(
+    name: "YourTarget",
+    dependencies: [
+        .product(name: "ARCAuthentication", package: "ARCAuthentication"),
+        // Optional: add Google Sign-In support
+        .product(name: "ARCAuthGoogle", package: "ARCAuthentication"),
+    ]
+)
+```
 
-En tu `App.swift`, crea y configura el `AuthenticationManager`:
+## Sign in with Apple
+
+### Step 1: Create the Provider
 
 ```swift
 import ARCAuthentication
-import SwiftUI
 
-@main
-struct MyApp: App {
-    @StateObject private var authManager: AuthenticationManager = {
-        let manager = AuthenticationManager()
-        manager.register(provider: AppleAuthProvider())
-        return manager
-    }()
+let appleProvider = AppleCredentialProvider()
+```
 
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environmentObject(authManager)
-        }
+You can customize the requested scopes:
+
+```swift
+let appleProvider = AppleCredentialProvider(scopes: [.fullName, .email])
+```
+
+### Step 2: Request a Credential
+
+```swift
+do {
+    let credential = try await appleProvider.requestCredential()
+
+    switch credential {
+    case .apple(let apple):
+        // Send apple.identityToken and apple.authorizationCode to your backend
+        print("User: \(apple.userIdentifier)")
+    case .google:
+        break
+    }
+} catch let error as AuthenticationError {
+    switch error {
+    case .userCancelled:
+        break // User tapped Cancel
+    default:
+        print("Error: \(error.localizedDescription)")
     }
 }
 ```
 
-### Paso 2: Crear la Vista de Login
+### Step 3: Add the Button
 
 ```swift
 import ARCAuthentication
 import SwiftUI
 
 struct LoginView: View {
-    @EnvironmentObject var authManager: AuthenticationManager
+    let provider = AppleCredentialProvider()
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Bienvenido")
-                .font(.largeTitle)
-
-            AppleSignInButton {
-                try await authManager.authenticate(with: "apple")
+        AppleSignInButton {
+            Task {
+                let credential = try await provider.requestCredential()
+                // Handle credential...
             }
-            .frame(width: 280, height: 50)
         }
+        .frame(height: 50)
     }
 }
 ```
 
-### Paso 3: Manejar el Estado de Autenticación
+## Google Sign-In
+
+### Step 1: Get a Client ID
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) > **APIs & Services** > **Credentials**
+2. Create an **OAuth 2.0 Client ID** with application type **iOS**
+3. Enter your app's bundle identifier
+4. Note the **Client ID** (e.g., `123456.apps.googleusercontent.com`)
+5. Note the **Reversed Client ID** (e.g., `com.googleusercontent.apps.123456`)
+
+### Step 2: Configure Info.plist
+
+Add the reversed client ID as a URL scheme so Google can redirect back to your app:
+
+```xml
+<key>CFBundleURLTypes</key>
+<array>
+    <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>com.googleusercontent.apps.YOUR_CLIENT_ID</string>
+        </array>
+        <key>CFBundleURLName</key>
+        <string>Google Sign-In</string>
+    </dict>
+</array>
+```
+
+Optionally add the client ID for Info.plist-based configuration:
+
+```xml
+<key>GIDClientID</key>
+<string>YOUR_CLIENT_ID.apps.googleusercontent.com</string>
+```
+
+### Step 3: Handle the OAuth Callback
+
+In your app entry point, forward incoming URLs to the Google Sign-In SDK:
 
 ```swift
-struct ContentView: View {
-    @EnvironmentObject var authManager: AuthenticationManager
+import GoogleSignIn
+import SwiftUI
 
-    var body: some View {
-        Group {
-            if authManager.state.isAuthenticated {
-                MainView()
-            } else {
-                LoginView()
-            }
-        }
-        .task {
-            await authManager.restoreSession()
+@main
+struct MyApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .onOpenURL { url in
+                    GIDSignIn.sharedInstance.handle(url)
+                }
         }
     }
 }
 ```
 
-## Notas Importantes
+### Step 4: Create the Provider and Request a Credential
 
-### Email y Nombre
+```swift
+import ARCAuthGoogle
 
-Apple solo proporciona el email y nombre del usuario en el **primer** Sign in. Asegúrate de guardar estos valores inmediatamente.
+let config = GoogleConfiguration(clientID: "your-client-id.apps.googleusercontent.com")
+let provider = GoogleCredentialProvider(configuration: config)
+let credential = try await provider.requestCredential()
 
-### Identity Token
+switch credential {
+case .google(let google):
+    // Send google.idToken to your backend for verification
+    print("Name: \(google.displayName ?? "N/A")")
+    print("Email: \(google.email ?? "N/A")")
+case .apple:
+    break
+}
+```
 
-El `identityToken` es un JWT que debe verificarse en tu backend antes de confiar en él.
+You can also request additional OAuth scopes:
 
-### Estado de Credenciales
+```swift
+let config = GoogleConfiguration(
+    clientID: "your-client-id.apps.googleusercontent.com",
+    additionalScopes: ["https://www.googleapis.com/auth/drive.readonly"]
+)
+```
 
-Las credenciales de Apple pueden ser revocadas por el usuario en cualquier momento desde Configuración > Apple ID. Usa `restoreSession()` al iniciar la app para verificar el estado.
+## UI Components
+
+ARCAuthentication ships ready-to-use SwiftUI sign-in buttons that follow platform and brand guidelines out of the box. Use these instead of building your own.
+
+### AppleSignInButton
+
+A thin wrapper around the system `SignInWithAppleButton` that automatically applies the correct style for the current color scheme — black in light mode, white in dark mode — following [Apple Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/sign-in-with-apple).
+
+```swift
+import ARCAuthentication
+import SwiftUI
+
+AppleSignInButton {
+    Task { await signInWithApple() }
+}
+```
+
+You can also pin a specific label and style:
+
+```swift
+// Sign up vs sign in labels
+AppleSignInButton(type: .signUp) { ... }
+AppleSignInButton(type: .continue) { ... }
+
+// Fixed styles (bypasses adaptive logic)
+AppleSignInButton(type: .signIn, style: .white) { ... }
+AppleSignInButton(type: .signIn, style: .whiteOutline) { ... }
+```
+
+**Color behavior:**
+| Mode | Background | Text / Logo |
+|------|------------|-------------|
+| Light | `#000000` (black) | `#FFFFFF` (white) |
+| Dark  | `#FFFFFF` (white) | `#000000` (black) |
+
+### GoogleSignInButton
+
+A custom SwiftUI button that follows [Google Identity 2024 branding guidelines](https://developers.google.com/identity/branding-guidelines). The Google "G" logo always renders on a white tile; the surrounding button adapts to the color scheme.
+
+```swift
+import ARCAuthGoogle
+import SwiftUI
+
+GoogleSignInButton {
+    Task { await signInWithGoogle() }
+}
+```
+
+**Color behavior:**
+| Mode | Background | Border | Text |
+|------|------------|--------|------|
+| Light | `#FFFFFF` | `#747775` | `#1F1F1F` |
+| Dark  | `#131314` | `#8E918F` | `#E3E3E3` |
+
+> **Note:** The previous Google blue (`#4285F4`) was deprecated in March 2023 with the Google Sign-In JS v1 shutdown. The current guidelines use neutral backgrounds as shown above.
+
+### Putting it Together
+
+```swift
+import ARCAuthentication
+import ARCAuthGoogle
+import SwiftUI
+
+struct LoginView: View {
+    let onAppleSignIn: () -> Void
+    let onGoogleSignIn: () -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            AppleSignInButton(action: onAppleSignIn)
+            GoogleSignInButton(action: onGoogleSignIn)
+        }
+        .padding(.horizontal, 32)
+    }
+}
+```
+
+Both buttons handle their own `frame` and visual styling — you do not need to apply `.frame(height:)` or background modifiers. Both respond to color scheme changes automatically.
+
+## Using Multiple Providers
+
+Both providers conform to ``CredentialProviding``, so you can write generic sign-in logic:
+
+```swift
+func signIn(with provider: some CredentialProviding) async {
+    do {
+        let credential = try await provider.requestCredential()
+        // Send credential to your backend...
+    } catch let error as AuthenticationError {
+        if case .userCancelled = error { return }
+        // Handle error...
+    } catch {
+        // Handle unexpected error...
+    }
+}
+
+// Use with any provider
+await signIn(with: appleProvider)
+await signIn(with: googleProvider)
+```
+
+## Shared Keychain SSO
+
+ARCAuthentication incluye `KeychainAuthStorage`, un almacén seguro que permite guardar y
+recuperar la `AuthCredential` del usuario entre sesiones. Usando un Keychain Access Group
+compartido, FavRes, FavBook, FavPrint y cualquier otra app del mismo Team ID pueden compartir
+la sesión sin necesidad de backend propio.
+
+### Qué es el Keychain Access Group
+
+Un Keychain Access Group es un identificador que permite a varias apps del mismo Team ID Apple
+leer y escribir en los mismos ítems del Keychain del dispositivo. Una vez que el usuario inicia
+sesión en cualquiera de tus apps, el resto pueden recuperar su credencial directamente.
+
+### Configuración en Xcode
+
+Cada app que participe en el SSO debe activar la capability **Keychain Sharing**:
+
+1. En Xcode, selecciona el target de la app
+2. Ve a **Signing & Capabilities** → **+ Capability** → **Keychain Sharing**
+3. Añade el mismo grupo en todas las apps: `$(TeamID).com.arclabs.shared`
+
+> **Important:** Sustituye `$(TeamID)` por el Team ID real de tu cuenta de desarrollador Apple.
+> Puedes encontrarlo en [developer.apple.com](https://developer.apple.com) bajo Membership.
+
+### Uso
+
+```swift
+import ARCAuthentication
+
+// Almacenamiento local (una sola app)
+let storage = KeychainAuthStorage()
+
+// Almacenamiento compartido entre apps Fav*
+let sharedStorage = KeychainAuthStorage(accessGroup: AuthConstants.Keychain.sharedAccessGroup)
+
+// Guardar tras un sign-in exitoso
+let credential = try await appleProvider.requestCredential()
+try await sharedStorage.save(credential)
+
+// Recuperar en el arranque de cualquier app del grupo
+if let saved = try await sharedStorage.load() {
+    // El usuario ya tiene sesión — no mostrar pantalla de login
+}
+
+// Cerrar sesión
+try await sharedStorage.delete()
+appleProvider.signOut()  // o googleProvider.signOut()
+```
+
+### Verificar el estado de la sesión
+
+Los providers también implementan `SessionManaging`, lo que permite comprobar el estado
+de la sesión sin necesidad de haber guardado la credencial manualmente:
+
+```swift
+let state = await appleProvider.checkCredentialState()
+switch state {
+case .authorized:
+    print("Sesión activa")
+case .notFound:
+    print("Sin sesión — mostrar login")
+case .revoked:
+    print("Acceso revocado — limpiar datos locales")
+}
+```
+
+## Important Notes
+
+### Apple: Email and Name
+
+Apple only provides the user's email and name on the **first** sign-in. Store these values immediately in your backend.
+
+### Apple: Identity Token
+
+The `identityToken` is a JWT that must be verified on your backend before trusting it. The `authorizationCode` expires in 5 minutes.
+
+### Google: ID Token
+
+The `idToken` should be verified server-side. The `accessToken` can be used for Google API calls but has a short expiration.
+
+### Backend Integration
+
+ARCAuthentication only provides credentials. Your app is responsible for:
+- Sending credentials to your backend for verification
+- Managing user sessions and tokens
+- Storing authentication state

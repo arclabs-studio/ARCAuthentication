@@ -1,39 +1,41 @@
-# 🧑‍🧒 ARCAuthentication
+# ARCAuthentication
 
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg)
-![Platforms](https://img.shields.io/badge/Platforms-iOS%2017%20%7C%20macOS%2014%20%7C%20watchOS%2010%20%7C%20tvOS%2017%20%7C%20visionOS%201-blue.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+![Platforms](https://img.shields.io/badge/Platforms-iOS%2017%20%7C%20macOS%2014-blue.svg)
+![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-orange.svg)
 ![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)
 
-**Sistema de autenticación modular y reutilizable para apps de ARC Labs Studio.**
+**Backend-agnostic credential provider for Apple and Google authentication.**
 
 ---
 
-## 🎯 Overview
+## Overview
 
-ARCAuthentication proporciona una arquitectura protocol-oriented que permite autenticación mediante Sign in with Apple (SIWA) con integración preparada para un backend Vapor, preparado para expandirse a otros providers en el futuro.
+ARCAuthentication is a pure credential-provider library. It handles the platform sign-in flows (Sign in with Apple, Google Sign-In) and returns provider-specific credentials that your backend — Firebase, Vapor, Supabase, or any other — can consume directly.
 
-### Características
+### Features
 
-- ✅ Sign in with Apple nativo
-- ✅ Arquitectura protocol-oriented extensible
-- ✅ DTOs compartidos listos para Vapor
-- ✅ Gestión de estado con Combine/SwiftUI
-- ✅ Almacenamiento seguro en Keychain (vía ARCStorage)
-- ✅ Componentes UI base siguiendo HIG
-- ✅ Swift 6 con strict concurrency
+- Sign in with Apple via `AppleCredentialProvider`
+- Google Sign-In via `GoogleCredentialProvider` (separate `ARCAuthGoogle` target)
+- Protocol-oriented: implement `CredentialProviding` for custom providers
+- Shared sign-in logic across providers via protocol abstraction
+- Zero ARC package dependencies (core target)
+- `MockCredentialProvider` included for testing
+- `AppleSignInButton` SwiftUI component
+- Swift 6 strict concurrency
+- Demo app with both Apple and Google authentication
 
 ---
 
-## 📋 Requirements
+## Requirements
 
 - **Swift** 6.0+
-- **iOS** 17.0+ / **macOS** 14.0+ / **watchOS** 10.0+ / **tvOS** 17.0+ / **visionOS** 1.0+
+- **iOS** 17.0+ / **macOS** 14.0+
 - **Xcode** 16.0+
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Swift Package Manager
 
@@ -51,185 +53,228 @@ Then add the targets you need:
 .target(
     name: "YourTarget",
     dependencies: [
-        // Import both Core and Client
+        // Core: Apple credential provider
         .product(name: "ARCAuthentication", package: "ARCAuthentication"),
-        // Or import separately:
-        // .product(name: "ARCAuthCore", package: "ARCAuthentication"),
-        // .product(name: "ARCAuthClient", package: "ARCAuthentication"),
+        // Optional: Google credential provider
+        // .product(name: "ARCAuthGoogle", package: "ARCAuthentication"),
     ]
 )
 ```
 
 ---
 
-## 📖 Usage
+## Usage
 
-### Basic Setup
+### Sign in with Apple
 
 ```swift
 import ARCAuthentication
 
-@main
-struct MyApp: App {
-    @StateObject private var authManager: AuthenticationManager = {
-        let manager = AuthenticationManager()
-        manager.register(provider: AppleAuthProvider())
-        return manager
-    }()
+let provider = AppleCredentialProvider()
+let credential = try await provider.requestCredential()
 
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environmentObject(authManager)
-        }
-    }
+// Send to your backend
+switch credential {
+case .apple(let apple):
+    let token = apple.identityToken
+    let code = apple.authorizationCode
+    // Verify with your backend...
+case .google:
+    break
 }
 ```
 
-### Sign in with Apple
+### Using the Button
 
 ```swift
 import ARCAuthentication
 import SwiftUI
 
 struct LoginView: View {
-    @EnvironmentObject var authManager: AuthenticationManager
+    let provider = AppleCredentialProvider()
 
     var body: some View {
-        VStack {
-            AppleSignInButton {
-                try await authManager.authenticate(with: "apple")
-            }
-            .frame(width: 280, height: 50)
-        }
-    }
-}
-```
-
-### Check Authentication State
-
-```swift
-struct ContentView: View {
-    @EnvironmentObject var authManager: AuthenticationManager
-
-    var body: some View {
-        Group {
-            if authManager.state.isAuthenticated {
-                MainView()
-            } else {
-                LoginView()
+        // Adaptive — recommended (black in light mode, white in dark mode)
+        AppleSignInButton {
+            Task {
+                let credential = try await provider.requestCredential()
+                // Handle credential...
             }
         }
-        .task {
-            await authManager.restoreSession()
+        .frame(height: 50)
+
+        // Custom label type
+        AppleSignInButton(type: .signUp) {
+            Task { let credential = try await provider.requestCredential() }
+        }
+
+        // Fixed style (ignores color scheme)
+        AppleSignInButton(type: .continue, style: .whiteOutline) {
+            Task { let credential = try await provider.requestCredential() }
         }
     }
 }
 ```
 
-### Using the View Modifier
+`AppleSignInButton` accepts an `ARCAppleButtonLabel` for its `type` parameter — no `import AuthenticationServices` required in caller code. Available cases: `.signIn` (default), `.signUp`, `.continue`.
+
+### Google Sign-In
+
+Google Sign-In requires a client ID from the [Google Cloud Console](https://console.cloud.google.com/) and the `ARCAuthGoogle` target.
 
 ```swift
-ContentView()
-    .withAuthentication(manager: authManager) {
-        LoginView()
-    }
+import ARCAuthGoogle
+
+let config = GoogleConfiguration(clientID: "your-client-id.apps.googleusercontent.com")
+let provider = GoogleCredentialProvider(configuration: config)
+let credential = try await provider.requestCredential()
+
+switch credential {
+case .google(let google):
+    let idToken = google.idToken
+    let accessToken = google.accessToken
+    // Verify with your backend...
+case .apple:
+    break
+}
 ```
 
-### Sign Out
+Your app must also handle the OAuth callback URL:
 
 ```swift
-Button("Sign Out") {
-    Task {
-        try await authManager.signOut()
+// In your App entry point
+.onOpenURL { url in
+    GIDSignIn.sharedInstance.handle(url)
+}
+```
+
+And register the reversed client ID as a URL scheme in your `Info.plist`:
+
+```xml
+<key>CFBundleURLTypes</key>
+<array>
+    <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>com.googleusercontent.apps.YOUR_CLIENT_ID</string>
+        </array>
+    </dict>
+</array>
+```
+
+### Custom Provider
+
+```swift
+final class EmailCredentialProvider: CredentialProviding {
+    let providerType: AuthProviderType = .apple // or extend as needed
+
+    func requestCredential() async throws -> AuthCredential {
+        // Your implementation...
     }
 }
+```
+
+### Testing
+
+```swift
+import ARCAuthentication
+
+let mock = MockCredentialProvider(
+    providerType: .apple,
+    result: .success(.apple(.mock))
+)
+
+let credential = try await mock.requestCredential()
+assert(mock.requestCredentialCallCount == 1)
 ```
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ### Targets
 
-| Target | Description |
-|--------|-------------|
-| `ARCAuthCore` | DTOs compartidos (sin dependencias externas) - puede usarse en Vapor |
-| `ARCAuthClient` | Cliente iOS con providers, storage y UI |
-| `ARCAuthentication` | Convenience target que incluye ambos |
+| Target | Description | Dependencies |
+|--------|-------------|--------------|
+| `ARCAuthentication` | Core: protocols, models, Apple provider, utilities | None |
+| `ARCAuthGoogle` | Google Sign-In provider | ARCAuthentication, GoogleSignIn SDK |
 
 ### Key Components
 
 ```
-ARCAuthCore/
-├── DTOs/
-│   ├── Auth/
-│   │   ├── AuthCredential      # Credenciales de usuario
-│   │   ├── AppleAuthPayload    # Payload para verificación backend
-│   │   ├── TokenResponse       # Respuesta de tokens del servidor
-│   │   └── ...
-│   └── User/
-│       ├── UserDTO             # DTO de usuario
-│       └── UserProfileDTO      # Perfil extendido
-├── Errors/
-│   └── AuthenticationError     # Errores del sistema
-└── Constants/
-    └── AuthConstants           # Constantes de configuración
-
-ARCAuthClient/
-├── Core/
-│   ├── AuthenticationManager   # Manager central
-│   ├── AuthenticationState     # Estado observable
-│   └── AuthenticationConfiguration
+Sources/ARCAuthentication/
 ├── Protocols/
-│   ├── AuthenticationProvider  # Protocolo para providers
-│   ├── AuthStorageProtocol     # Protocolo para storage
-│   └── AuthAPIClientProtocol   # Protocolo para API
+│   └── CredentialProviding       # Provider protocol
 ├── Providers/
-│   └── AppleAuthProvider       # Sign in with Apple
-├── Storage/
-│   └── KeychainAuthStorage     # Storage en Keychain
-├── Networking/
-│   └── AuthAPIClient           # Cliente HTTP (futuro)
-└── UI/
-    ├── Components/
-    │   └── AppleSignInButton   # Botón SIWA
-    └── ViewModifiers/
-        └── AuthenticationViewModifier
+│   └── AppleCredentialProvider   # Sign in with Apple
+├── Models/
+│   ├── AuthCredential            # Credential enum + structs
+│   ├── AuthProviderType          # Provider type enum
+│   └── AuthenticationState       # Generic state enum
+├── Errors/
+│   └── AuthenticationError       # Credential-only errors
+├── Utilities/
+│   └── CryptoUtils               # Nonce + SHA256
+├── UI/
+│   ├── AppleSignInButton         # SwiftUI wrapper
+│   └── ARCAppleButtonLabel       # Button label enum (.signIn, .signUp, .continue)
+└── Testing/
+    └── MockCredentialProvider     # Test double
+
+Sources/ARCAuthGoogle/
+├── Models/
+│   └── GoogleConfiguration       # Google client config
+└── Providers/
+    └── GoogleCredentialProvider   # Google Sign-In
 ```
 
 ---
 
-## 🧪 Testing
+## Demo App
 
-Run tests with:
+A complete demo app is included at `Example/ARCAuthenticationDemo/` showing both providers in action:
+
+- **Sign in with Apple** — works on the iOS Simulator without configuration
+- **Google Sign-In** — requires a Google Cloud Console client ID (see the [demo README](Example/ARCAuthenticationDemo/README.md) for setup)
+
+The demo uses a shared `signIn(with: some CredentialProviding)` method to show how the protocol abstraction works in practice.
+
+---
+
+## Migration from v1
+
+v2.0.0 is a **breaking change**. The library no longer manages sessions, tokens, or backend communication.
+
+| v1 | v2 |
+|----|----|
+| `import ARCAuthCore` / `import ARCAuthClient` | `import ARCAuthentication` |
+| `AuthenticationManager` | Removed — manage state in your app |
+| `AppleAuthProvider().authenticate()` | `AppleCredentialProvider().requestCredential()` |
+| `KeychainAuthStorage` | Removed — use your backend's storage |
+| `AuthAPIClient` | Removed — use your backend's client |
+| ARCLogger / ARCStorage deps | Zero ARC deps |
+
+---
+
+## Testing
 
 ```bash
 swift test
-```
-
-Or use the Makefile:
-
-```bash
+# Or:
 make test
 ```
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 This package follows ARC Labs Studio development standards. See [ARCKnowledge](https://github.com/arclabs-studio/ARCKnowledge) for guidelines.
 
 ### Development Setup
 
 ```bash
-# Clone with submodules
 git clone --recurse-submodules https://github.com/arclabs-studio/ARCAuthentication
-
-# Or initialize submodules after cloning
 git submodule update --init --recursive
-
-# Run ARCDevTools setup
 ./ARCDevTools/arcdevtools-setup
 ```
 
@@ -247,7 +292,13 @@ make test    # Run tests
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+**PolyForm Noncommercial License 1.0.0** © 2025–2026 ARC Labs Studio.
+
+Source-available. Free for non-commercial use (research, study, hobby, evaluation). **Commercial use requires a separate license** — contact `arclabs.studio@gmail.com`.
+
+ARC Labs Studio's own commercial products are covered by an internal use grant — see [INTERNAL-USE.md](INTERNAL-USE.md).
+
+See [LICENSE](LICENSE) for the full license text.
 
 ---
 

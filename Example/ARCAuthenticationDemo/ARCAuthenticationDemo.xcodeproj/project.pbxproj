@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2967F0DA2F6974B60083D644 /* ARCAuthentication in Frameworks */ = {isa = PBXBuildFile; productRef = 8A1234560000000000000070 /* ARCAuthentication */; };
+		2967F0DB2F6974B60083D644 /* ARCAuthGoogle in Frameworks */ = {isa = PBXBuildFile; productRef = 8A1234560000000000000071 /* ARCAuthGoogle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,13 +42,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2967F0DB2F6974B60083D644 /* ARCAuthGoogle in Frameworks */,
+				2967F0DA2F6974B60083D644 /* ARCAuthentication in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		8A1234560000000000000030 /* Root */ = {
+		8A1234560000000000000030 = {
 			isa = PBXGroup;
 			children = (
 				8A1234560000000000000003 /* ARCAuthenticationDemo */,
@@ -91,8 +95,8 @@
 			);
 			name = ARCAuthenticationDemo;
 			packageProductDependencies = (
-				8A1234560000000000000070 /* ARCAuthClient */,
-				8A1234560000000000000071 /* ARCAuthCore */,
+				8A1234560000000000000070 /* ARCAuthentication */,
+				8A1234560000000000000071 /* ARCAuthGoogle */,
 			);
 			productName = ARCAuthenticationDemo;
 			productReference = 8A1234560000000000000001 /* ARCAuthenticationDemo.app */;
@@ -120,7 +124,7 @@
 				en,
 				Base,
 			);
-			mainGroup = 8A1234560000000000000030 /* Root */;
+			mainGroup = 8A1234560000000000000030;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				8A1234560000000000000060 /* XCLocalSwiftPackageReference "../.." */,
@@ -366,13 +370,13 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		8A1234560000000000000070 /* ARCAuthClient */ = {
+		8A1234560000000000000070 /* ARCAuthentication */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = ARCAuthClient;
+			productName = ARCAuthentication;
 		};
-		8A1234560000000000000071 /* ARCAuthCore */ = {
+		8A1234560000000000000071 /* ARCAuthGoogle */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = ARCAuthCore;
+			productName = ARCAuthGoogle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

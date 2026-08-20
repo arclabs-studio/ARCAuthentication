@@ -5,9 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0] - 2026-08-20
+
+First public release of **ARCAuthentication**.
+
+ARC Labs Studio re-baselined every package at `1.0.0` for its first product launch. The pre-launch version history (1.0.0 → 2.0.0) never corresponded to a release the studio stood behind; those tags and GitHub Releases have been removed and the notes are preserved below under [Pre-1.0 history](#pre-10-history-untagged).
 
 ### Added
+
+- **`INTERNAL-USE.md`** — documents ARC Labs Studio's self-grant for commercial use of its own products under the new licence.
 
 - `AuthConstants.Keychain.sharedAccessGroup` — constante del Keychain Access Group compartido entre apps ARC Labs Studio (FavRes, FavBook, FavPrint y futuras apps Fav*)
 - `KeychainAuthStorage` — almacén seguro de `AuthCredential` en el Keychain con soporte de Keychain Access Group para SSO entre apps; incluye `init()` y `init(accessGroup:)`
@@ -27,9 +33,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `AuthCredential`, `AppleCredential`, `GoogleCredential` conforman ahora a `Codable` (cambio aditivo, sin breaking changes en la API existente)
 
-## [2.0.0] - 2026-02-27
+- **License** — relicensed from MIT to [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0). Source-available and free for non-commercial use; commercial use requires a separate licence from ARC Labs Studio. ARC Labs Studio's own products are covered by an internal grant — see `INTERNAL-USE.md`.
 
-### Breaking Changes
+---
+
+## Pre-1.0 history (untagged)
+
+Everything below predates the 1.0.0 baseline. The version numbers are retained for traceability only — no tag or release exists for any of them.
+
+### [2.0.0] - 2026-02-27
+
+#### Breaking Changes
 
 - **Complete API redesign**: ARCAuthentication is now a pure credential provider library.
   The Vapor-specific session management, token storage, and API client have been removed.
@@ -42,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed dependencies on `ARCLogger` and `ARCStorage`
 - Dropped watchOS, tvOS, and visionOS platform support
 
-### Added
+#### Added
 
 - `CredentialProviding` protocol for backend-agnostic credential providers
 - `AuthCredential` enum with `.apple(AppleCredential)` and `.google(GoogleCredential)` cases
@@ -58,16 +72,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `MockCredentialProvider` in Sources for consumer testing
 - `AppleSignInButton` simplified to pure UI wrapper
 
-### Changed
+#### Changed
 
 - `AppleSignInButton` no longer manages loading state or error alerts — delegates entirely to caller
 - `CryptoUtils.generateNonce()` renamed to `CryptoUtils.randomNonceString(length:)`
 - `CryptoUtils.sha256Hash(of:)` renamed to `CryptoUtils.sha256(_:)`
 - `CryptoUtils` falls back to `UInt8.random` instead of throwing on `SecRandomCopyBytes` failure
 
-## [1.0.0] - 2026-01-23
+---
 
-### Added
+### [1.0.0] - 2026-01-23
+
+#### Added
 
 - Initial release of ARCAuthentication
 - **ARCAuthCore**: Shared DTOs for authentication
@@ -82,3 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- 2.0.0 has no published git tag yet; restore the link once v2.0.0 is tagged. -->
 <!-- [2.0.0]: https://github.com/arclabs-studio/ARCAuthentication/compare/v1.0.0...v2.0.0 -->
+
+---
+
+[1.0.0]: https://github.com/arclabs-studio/ARCAuthentication/releases/tag/v1.0.0

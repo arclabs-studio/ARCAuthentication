@@ -30,6 +30,12 @@ public enum GoogleAuthErrorMapper {
             return .systemError("Requested scopes were already granted")
         case .EMM:
             return .systemError("Enterprise Mobility Management error")
+        case .keychain:
+            return .systemError("Keychain error")
+        case .mismatchWithCurrentUser:
+            return .systemError("Operation does not match the current user")
+        case .unknown:
+            return .unknown(error.localizedDescription)
         @unknown default:
             return .unknown(error.localizedDescription)
         }

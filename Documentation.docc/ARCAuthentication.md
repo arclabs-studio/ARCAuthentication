@@ -11,7 +11,7 @@ The package provides two targets:
 - **ARCAuthentication**: Core library with Apple credential provider, models, and utilities
 - **ARCAuthGoogle**: Google Sign-In credential provider (requires GoogleSignIn SDK)
 
-A demo app is included in `Example/ARCAuthenticationDemo/` showcasing both Sign in with Apple and Google Sign-In with shared sign-in logic via the ``CredentialProviding`` protocol.
+A demo app is included in `Examples/ARCAuthenticationDemo/` showcasing both Sign in with Apple and Google Sign-In with shared sign-in logic via the ``CredentialProviding`` protocol.
 
 ## Topics
 

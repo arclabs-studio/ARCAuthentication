@@ -25,7 +25,7 @@ import UIKit
 /// `serverClientID` for Firebase backend token exchange), set those properties **after**
 /// calling ``requestCredential()``, or subclass / wrap this provider to preserve them.
 @MainActor
-public final class GoogleCredentialProvider: CredentialProviding, @unchecked Sendable {
+public final class GoogleCredentialProvider: CredentialProviding {
     // MARK: - Properties
 
     public let providerType: AuthProviderType = .google

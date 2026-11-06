@@ -42,6 +42,10 @@ public enum CryptoUtils {
     public static func sha256(_ input: String) -> String {
         let data = Data(input.utf8)
         let hash = SHA256.hash(data: data)
-        return hash.compactMap { String(format: "%02x", $0) }.joined()
+        let hexBytes = hash.map { byte in
+            let hex = String(byte, radix: 16)
+            return byte < 0x10 ? "0" + hex : hex
+        }
+        return hexBytes.joined()
     }
 }

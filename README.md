@@ -232,10 +232,10 @@ Sources/ARCAuthGoogle/
 
 ## Demo App
 
-A complete demo app is included at `Example/ARCAuthenticationDemo/` showing both providers in action:
+A complete demo app is included at `Examples/ARCAuthenticationDemo/` showing both providers in action:
 
 - **Sign in with Apple** — works on the iOS Simulator without configuration
-- **Google Sign-In** — requires a Google Cloud Console client ID (see the [demo README](Example/ARCAuthenticationDemo/README.md) for setup)
+- **Google Sign-In** — requires a Google Cloud Console client ID (see the [demo README](Examples/ARCAuthenticationDemo/README.md) for setup)
 
 The demo uses a shared `signIn(with: some CredentialProviding)` method to show how the protocol abstraction works in practice.
 

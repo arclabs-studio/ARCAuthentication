@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-11-06
+
+### Changed
+
+- **The credential providers are now checked `Sendable`.** `AppleCredentialProvider` and `GoogleCredentialProvider` are `@MainActor`, which already makes them `Sendable`, so the redundant `@unchecked Sendable` is gone. `MockCredentialProvider` keeps its result and call count in an `OSAllocatedUnfairLock` instead of an `NSLock` behind `@unchecked Sendable`. The public API is unchanged and the compiler now verifies the thread-safety the types claimed ([#23](https://github.com/arclabs-studio/ARCAuthentication/pull/23)).
+- **`CryptoUtils.sha256` hex-encodes with `String(_:radix:)` instead of `String(format:)`.** The output is byte-for-byte identical — lowercase, zero-padded — and the known-vector test still passes, so existing nonce hashes keep matching ([#23](https://github.com/arclabs-studio/ARCAuthentication/pull/23)).
+
+### Fixed
+
+- **Three Google Sign-In error codes fell through to `@unknown default`.** `GoogleAuthErrorMapper` now maps `GIDSignInError.keychain` to `.systemError("Keychain error")` and `.mismatchWithCurrentUser` to `.systemError("Operation does not match the current user")`; before, both came back as `.unknown(localizedDescription)`. `.unknown` still maps to `.unknown(localizedDescription)`, now explicitly. Callers that match on `AuthenticationError.unknown` to catch these two cases should match `.systemError` instead ([#22](https://github.com/arclabs-studio/ARCAuthentication/pull/22)).
+
+### Examples
+
+- The demo app moved from `Example/` to `Examples/ARCAuthenticationDemo/`; the README and DocC links point to the new path ([#22](https://github.com/arclabs-studio/ARCAuthentication/pull/22)).
+
 ## [1.0.0] - 2026-08-20
 
 First public release of **ARCAuthentication**.

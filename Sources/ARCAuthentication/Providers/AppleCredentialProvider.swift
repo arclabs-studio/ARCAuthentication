@@ -48,7 +48,7 @@ import UIKit
 /// - The `identityToken` is a JWT that must be verified on the server.
 /// - The `authorizationCode` expires in 5 minutes.
 @MainActor
-public final class AppleCredentialProvider: NSObject, CredentialProviding, @unchecked Sendable {
+public final class AppleCredentialProvider: NSObject, CredentialProviding {
     // MARK: - Properties
 
     public let providerType: AuthProviderType = .apple

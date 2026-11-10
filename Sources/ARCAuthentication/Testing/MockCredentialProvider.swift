@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// A configurable mock credential provider for consumer testing.
 ///
@@ -14,24 +15,27 @@ import Foundation
 /// let credential = try await mock.requestCredential()
 /// #expect(mock.requestCredentialCallCount == 1)
 /// ```
-public final class MockCredentialProvider: CredentialProviding, @unchecked Sendable {
+public final class MockCredentialProvider: CredentialProviding {
     // MARK: - Properties
 
     public let providerType: AuthProviderType
 
-    private let lock = NSLock()
-    private var _result: Result<AuthCredential, AuthenticationError>
-    private var _requestCredentialCallCount = 0
+    private struct State {
+        var result: Result<AuthCredential, AuthenticationError>
+        var requestCredentialCallCount = 0
+    }
+
+    private let state: OSAllocatedUnfairLock<State>
 
     /// The result to return from ``requestCredential()``.
     public var result: Result<AuthCredential, AuthenticationError> {
-        get { lock.withLock { _result } }
-        set { lock.withLock { _result = newValue } }
+        get { state.withLock { $0.result } }
+        set { state.withLock { $0.result = newValue } }
     }
 
     /// The number of times ``requestCredential()`` has been called.
     public var requestCredentialCallCount: Int {
-        lock.withLock { _requestCredentialCallCount }
+        state.withLock { $0.requestCredentialCallCount }
     }
 
     // MARK: - Initialization
@@ -43,13 +47,16 @@ public final class MockCredentialProvider: CredentialProviding, @unchecked Senda
     public init(providerType: AuthProviderType = .apple,
                 result: Result<AuthCredential, AuthenticationError> = .success(.apple(.mock))) {
         self.providerType = providerType
-        _result = result
+        state = OSAllocatedUnfairLock(initialState: State(result: result))
     }
 
     // MARK: - CredentialProviding
 
     public func requestCredential() async throws -> AuthCredential {
-        lock.withLock { _requestCredentialCallCount += 1 }
+        let result = state.withLock { state in
+            state.requestCredentialCallCount += 1
+            return state.result
+        }
         return try result.get()
     }
 }

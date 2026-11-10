@@ -3,7 +3,7 @@
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg)
 ![Platforms](https://img.shields.io/badge/Platforms-iOS%2017%20%7C%20macOS%2014-blue.svg)
 ![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-orange.svg)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/Version-1.0.1-blue.svg)
 
 **Backend-agnostic credential provider for Apple and Google authentication.**
 
@@ -232,10 +232,10 @@ Sources/ARCAuthGoogle/
 
 ## Demo App
 
-A complete demo app is included at `Example/ARCAuthenticationDemo/` showing both providers in action:
+A complete demo app is included at `Examples/ARCAuthenticationDemo/` showing both providers in action:
 
 - **Sign in with Apple** — works on the iOS Simulator without configuration
-- **Google Sign-In** — requires a Google Cloud Console client ID (see the [demo README](Example/ARCAuthenticationDemo/README.md) for setup)
+- **Google Sign-In** — requires a Google Cloud Console client ID (see the [demo README](Examples/ARCAuthenticationDemo/README.md) for setup)
 
 The demo uses a shared `signIn(with: some CredentialProviding)` method to show how the protocol abstraction works in practice.
 

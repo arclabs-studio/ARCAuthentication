@@ -72,11 +72,11 @@ Swift 6 strict concurrency (`swiftLanguageModes: [.v6]`). Providers use:
 
 ## Demo App
 
-`Example/ARCAuthenticationDemo/` — Xcode project (not SPM) that demonstrates both providers. Sign in with Apple works on Simulator without configuration. Google Sign-In requires a Google Cloud Console client ID configured in `ContentView.swift` and `Info.plist` build settings (`GOOGLE_CLIENT_ID`, `GOOGLE_REVERSED_CLIENT_ID`).
+`Examples/ARCAuthenticationDemo/` — Xcode project (not SPM) that demonstrates both providers. Sign in with Apple works on Simulator without configuration. Google Sign-In requires a Google Cloud Console client ID configured in `ContentView.swift` and `Info.plist` build settings (`GOOGLE_CLIENT_ID`, `GOOGLE_REVERSED_CLIENT_ID`).
 
 Build the demo app:
 ```bash
-xcodebuild -project Example/ARCAuthenticationDemo/ARCAuthenticationDemo.xcodeproj \
+xcodebuild -project Examples/ARCAuthenticationDemo/ARCAuthenticationDemo.xcodeproj \
   -scheme ARCAuthenticationDemo \
   -destination 'platform=iOS Simulator,name=iPhone 16' \
   build

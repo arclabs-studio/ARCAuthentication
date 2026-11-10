@@ -58,6 +58,41 @@ struct GoogleAuthErrorMapperTests {
         }
     }
 
+    @Test("Should map keychain error to systemError", .tags(.unit)) func mapKeychainError() {
+        // Given
+        let error = NSError(domain: GIDSignInError.errorDomain, code: GIDSignInError.keychain.rawValue)
+
+        // When
+        let result = GoogleAuthErrorMapper.mapError(error)
+
+        // Then
+        #expect(result == .systemError("Keychain error"))
+    }
+
+    @Test("Should map mismatchWithCurrentUser error to systemError", .tags(.unit))
+    func mapMismatchWithCurrentUserError() {
+        // Given
+        let error = NSError(domain: GIDSignInError.errorDomain,
+                            code: GIDSignInError.mismatchWithCurrentUser.rawValue)
+
+        // When
+        let result = GoogleAuthErrorMapper.mapError(error)
+
+        // Then
+        #expect(result == .systemError("Operation does not match the current user"))
+    }
+
+    @Test("Should map GIDSignIn unknown code to unknown error", .tags(.unit)) func mapGoogleUnknownCode() {
+        // Given
+        let error = NSError(domain: GIDSignInError.errorDomain, code: GIDSignInError.unknown.rawValue)
+
+        // When
+        let result = GoogleAuthErrorMapper.mapError(error)
+
+        // Then
+        #expect(result == .unknown(error.localizedDescription))
+    }
+
     @Test("Should map non-GIDSignIn domain error to systemError", .tags(.unit)) func mapNonGoogleDomainError() {
         // Given
         let error = NSError(domain: "com.example.other", code: 42)
